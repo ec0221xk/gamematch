@@ -50,7 +50,7 @@ export default async function ProfileDashboardPage() {
     redirect("/login?redirectTo=/dashboard/profile");
   }
 
-  const profile = profileResult.data;
+  const profile = profileResult.data!;
   const offerings = offeringsResult.data ?? [];
 
   return (
