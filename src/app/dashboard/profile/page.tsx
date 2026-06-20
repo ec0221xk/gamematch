@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/dashboard/ProfileForm";
 import { OfferingForm } from "@/components/dashboard/OfferingForm";
@@ -6,6 +5,7 @@ import { DeleteOfferingButton } from "@/components/dashboard/DeleteOfferingButto
 import { Badge, Card } from "@/components/ui";
 import { getActiveGames } from "@/lib/queries/games";
 import { getCategories } from "@/lib/queries/categories";
+import { notFound, redirect } from "next/navigation";
 
 type RawOwnedOfferingRow = {
   id: string;
@@ -16,6 +16,46 @@ type RawOwnedOfferingRow = {
   category: { id: number; name: string } | null;
 };
 
+type ProfileData = {
+  display_name: string;
+  bio: string | null;
+  discord_id: string | null;
+  country: string | null;
+  languages: string[];
+  is_creator: boolean;
+};
+
+// redirect()の後をTypeScriptがneverと判断する問題を避けるため
+// データ取得とレンダリングを別関数に分離する構造に変更
+async function getPageData(userId: string) {
+  const supabase = createClient();
+
+  const [profileResult, offeringsResult, games, categories] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("display_name, bio, discord_id, country, languages, is_creator")
+      .eq("id", userId)
+      .single(),
+    supabase
+      .from("creator_games")
+      .select(
+        "id, rank, price, description, game:games(id, name), category:categories(id, name)",
+      )
+      .eq("creator_id", userId)
+      .order("created_at", { ascending: false })
+      .returns<RawOwnedOfferingRow[]>(),
+    getActiveGames(),
+    getCategories(),
+  ]);
+
+  return {
+    profile: profileResult.data as ProfileData | null,
+    offerings: offeringsResult.data ?? [],
+    games,
+    categories,
+  };
+}
+
 export default async function ProfileDashboardPage() {
   const supabase = createClient();
 
@@ -23,44 +63,15 @@ export default async function ProfileDashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // middleware.tsで保護されているため通常は発生しないが、念のためのフォールバック
   if (!user) {
     redirect("/login?redirectTo=/dashboard/profile");
   }
 
-  const [profileResult, offeringsResult, games, categories] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("display_name, bio, discord_id, country, languages, is_creator")
-      .eq("id", user.id)
-      .single(),
-    supabase
-      .from("creator_games")
-      .select(
-        "id, rank, price, description, game:games(id, name), category:categories(id, name)",
-      )
-      .eq("creator_id", user.id)
-      .order("created_at", { ascending: false })
-      .returns<RawOwnedOfferingRow[]>(),
-    getActiveGames(),
-    getCategories(),
-  ]);
+  const { profile, offerings, games, categories } = await getPageData(user.id);
 
-  if (!profileResult.data) {
-    redirect("/login?redirectTo=/dashboard/profile");
+  if (!profile) {
+    notFound();
   }
-
-  // redirectの後もTypeScriptがnever型と判断するため明示的にキャスト
-  type ProfileData = {
-    display_name: string;
-    bio: string | null;
-    discord_id: string | null;
-    country: string | null;
-    languages: string[];
-    is_creator: boolean;
-  };
-  const profile = profileResult.data as ProfileData;
-  const offerings = offeringsResult.data ?? [];
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
