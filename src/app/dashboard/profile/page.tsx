@@ -50,7 +50,16 @@ export default async function ProfileDashboardPage() {
     redirect("/login?redirectTo=/dashboard/profile");
   }
 
-  const profile = profileResult.data!;
+  // redirectの後もTypeScriptがnever型と判断するため明示的にキャスト
+  type ProfileData = {
+    display_name: string;
+    bio: string | null;
+    discord_id: string | null;
+    country: string | null;
+    languages: string[];
+    is_creator: boolean;
+  };
+  const profile = profileResult.data as ProfileData;
   const offerings = offeringsResult.data ?? [];
 
   return (
