@@ -14,15 +14,20 @@ export async function Header() {
           GameMatch
         </Link>
 
-        <nav className="hidden items-center gap-6 text-sm text-gray-600 sm:flex">
+<nav className="hidden items-center gap-6 text-sm text-gray-600 sm:flex">
           <Link href="/how-it-works" className="hover:text-gray-900">
             ご利用の流れ
+          </Link>
+          <Link href="/faq" className="hover:text-gray-900">
+            よくある質問
+          </Link>
+          <Link href="/safety" className="hover:text-gray-900">
+            安心して利用するために
           </Link>
           <Link href="/creators" className="hover:text-gray-900">
             Creatorを探す
           </Link>
         </nav>
-
         <div className="flex items-center gap-3">
           {user ? (
             <>
