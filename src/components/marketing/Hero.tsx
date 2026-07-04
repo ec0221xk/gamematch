@@ -1,11 +1,5 @@
-import { ButtonLink } from "@/components/ui";
 import { HeroIllustration } from "./HeroIllustration";
 
-/**
- * Hero: 完全にシンプル化。CTA1つ・テキスト最小化。
- * Creator登録導線はページ最下部のCreatorCTAに集約。
- * 両面メリットバッジ・料金テキストは削除(TrustSectionに移動)。
- */
 export function Hero() {
   return (
     <section className="relative overflow-hidden px-6 pt-8 pb-10 sm:pt-14 sm:pb-16">
@@ -21,17 +15,10 @@ export function Hero() {
               style={{ fontSize: "clamp(2rem, 4.5vw, 3.25rem)", lineHeight: 1.15, letterSpacing: "-0.025em" }}>
               ゲームの時間を、<br />特別な体験に。
             </h1>
-            {/* サブコピー: 1行に凝縮 */}
             <p className="mt-5 text-gray-500 sm:mx-0"
               style={{ fontSize: "1.1rem", lineHeight: 1.75 }}>
               推しのCreatorと遊ぶ。上手い人に教わる。
             </p>
-            {/* CTA: 1つだけ */}
-            <div className="mt-8">
-              <ButtonLink href="/creators" size="lg" className="whitespace-nowrap">
-                Creatorを探す
-              </ButtonLink>
-            </div>
           </div>
           <div className="w-full max-w-xs sm:max-w-none sm:flex-1">
             <HeroIllustration />
