@@ -11,6 +11,7 @@ type RawOwnedOfferingRow = {
   id: string;
   rank: string | null;
   price: number;
+  unit: string;
   description: string | null;
   game: { id: string; name: string } | null;
   category: { id: number; name: string } | null;
@@ -42,7 +43,7 @@ async function getPageData(userId: string) {
     supabase
       .from("creator_games")
       .select(
-        "id, rank, price, description, game:games(id, name), category:categories(id, name)",
+        "id, rank, price, unit, description, game:games(id, name), category:categories(id, name)",
       )
       .eq("creator_id", userId)
       .order("created_at", { ascending: false })
@@ -133,6 +134,7 @@ export default async function ProfileDashboardPage() {
                       categoryId: offering.category?.id ?? 0,
                       rank: offering.rank ?? "",
                       price: offering.price,
+                      unit: offering.unit,
                       description: offering.description ?? "",
                     }}
                   />

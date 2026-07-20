@@ -10,6 +10,7 @@ export interface OfferingDetail {
   categoryName: string;
   rank: string | null;
   price: number;
+  unit: string;
   description: string | null;
 }
 
@@ -17,6 +18,7 @@ type RawOfferingDetailRow = {
   id: string;
   rank: string | null;
   price: number;
+  unit: string;
   description: string | null;
   category_id: number;
   creator: {
@@ -41,7 +43,7 @@ export async function getOfferingDetail(
   const { data, error } = await supabase
     .from("creator_games")
     .select(
-      `id, rank, price, description, category_id, creator:profiles(id, display_name, profile_image_url), game:games(name), category:categories(name)`,
+      `id, rank, price, unit, description, category_id, creator:profiles(id, display_name, profile_image_url), game:games(name), category:categories(name)`,
     )
     .eq("id", offeringId)
     .single()
@@ -61,6 +63,7 @@ export async function getOfferingDetail(
     categoryName: data.category.name,
     rank: data.rank,
     price: data.price,
+    unit: data.unit,
     description: data.description,
   };
 }

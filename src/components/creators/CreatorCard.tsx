@@ -29,7 +29,7 @@ export function CreatorCard({ data }: CreatorCardProps) {
         </div>
         <p className="mt-auto text-sm font-medium text-gray-900">
           ¥{data.price.toLocaleString()}
-          <span className="ml-1 text-gray-400">/ 1回</span>
+          <span className="ml-1 text-gray-400">/ {data.unit}</span>
         </p>
       </Card>
     </Link>

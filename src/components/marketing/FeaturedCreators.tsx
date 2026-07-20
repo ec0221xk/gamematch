@@ -16,6 +16,7 @@ const SAMPLE_CREATORS: SampleCreator[] = [
     gameName: "Apex Legends",
     rank: "マスター",
     price: 1500,
+    unit: "1時間",
     categoryName: "一緒に遊ぶ",
     bio: "ランクマをフレンドリーに一緒に回ります。初心者大歓迎！ポジショニングを優しく解説します。",
     tags: ["ボイスチャット対応", "初心者歓迎"],
@@ -27,6 +28,7 @@ const SAMPLE_CREATORS: SampleCreator[] = [
     gameName: "VALORANT",
     rank: "イモータル",
     price: 2000,
+    unit: "90分",
     categoryName: "コーチング",
     bio: "エイム・立ち回りを丁寧に解説。伸び悩んでいる方のランク帯に合わせてカスタマイズします。",
     tags: ["ボイスチャット対応", "丁寧な解説"],
@@ -38,6 +40,7 @@ const SAMPLE_CREATORS: SampleCreator[] = [
     gameName: "League of Legends",
     rank: "ダイヤ",
     price: 1800,
+    unit: "3試合",
     categoryName: "ランクアップ支援",
     bio: "目標ランクまで最短ルートで伴走します。メンタルサポートも大切にしています！",
     tags: ["ボイスチャット対応", "女性Creator"],
@@ -119,7 +122,7 @@ export function FeaturedCreators({ creators }: FeaturedCreatorsProps) {
                     <span className="font-bold text-gray-900" style={{ fontSize: "18px" }}>
                       ¥{creator.price.toLocaleString()}
                     </span>
-                    <span className="ml-1 text-xs text-gray-400">/ 1回</span>
+                    <span className="ml-1 text-xs text-gray-400">/ {creator.unit}</span>
                   </div>
                   <p className="mt-0.5 text-[10px] text-gray-400">
                     ※料金はCreatorとの合意後に確定します

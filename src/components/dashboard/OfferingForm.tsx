@@ -7,6 +7,8 @@ import { Button, Input, Select, Textarea } from "@/components/ui";
 import type { GameOption } from "@/lib/queries/games";
 import type { CategoryOption } from "@/lib/queries/categories";
 
+const UNIT_OPTIONS = ["1時間", "90分", "3試合", "1回"];
+
 interface OfferingFormProps {
   games: GameOption[];
   categories: CategoryOption[];
@@ -17,6 +19,7 @@ interface OfferingFormProps {
     categoryId: number;
     rank: string;
     price: number;
+    unit: string;
     description: string;
   };
 }
@@ -44,6 +47,7 @@ export function OfferingForm({
   const [price, setPrice] = useState(
     initialValues?.price !== undefined ? String(initialValues.price) : "",
   );
+  const [unit, setUnit] = useState(initialValues?.unit ?? UNIT_OPTIONS[0]);
   const [description, setDescription] = useState(
     initialValues?.description ?? "",
   );
@@ -77,6 +81,7 @@ export function OfferingForm({
       category_id: Number(categoryId),
       rank: rank.trim() || null,
       price: Number(price),
+      unit,
       description: description.trim() || null,
     };
 
@@ -96,6 +101,7 @@ export function OfferingForm({
       setCategoryId("");
       setRank("");
       setPrice("");
+      setUnit(UNIT_OPTIONS[0]);
       setDescription("");
     }
 
@@ -110,6 +116,10 @@ export function OfferingForm({
   const categoryOptions = categories.map((category) => ({
     label: category.name,
     value: String(category.id),
+  }));
+  const unitOptions = UNIT_OPTIONS.map((option) => ({
+    label: option,
+    value: option,
   }));
 
   return (
@@ -138,13 +148,19 @@ export function OfferingForm({
           onChange={(event) => setRank(event.target.value)}
         />
         <Input
-          label="料金(円・1回あたり)"
+          label="料金(円)"
           type="number"
           min={0}
           value={price}
           onChange={(event) => setPrice(event.target.value)}
         />
       </div>
+      <Select
+        label="料金の単位"
+        options={unitOptions}
+        value={unit}
+        onChange={(event) => setUnit(event.target.value)}
+      />
       <Textarea
         label="説明(任意)"
         placeholder="例: フレンドリーにランクマッチを一緒に回ります。"

@@ -85,7 +85,7 @@ export default async function RequestPage({
         </div>
         <p className="mt-3 text-sm font-semibold text-gray-900">
           ¥{offering.price.toLocaleString()}
-          <span className="ml-1 font-normal text-gray-400">/ 1回</span>
+          <span className="ml-1 font-normal text-gray-400">/ {offering.unit}</span>
         </p>
       </Card>
 

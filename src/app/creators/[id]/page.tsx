@@ -74,7 +74,7 @@ export default async function CreatorDetailPage({
               <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end sm:justify-start">
                 <p className="text-sm font-medium text-gray-900">
                   ¥{offering.price.toLocaleString()}
-                  <span className="ml-1 text-gray-400">/ 1回</span>
+                  <span className="ml-1 text-gray-400">/ {offering.unit}</span>
                 </p>
                 <ButtonLink
                   href={`/creators/${creator.id}/request?offering=${offering.id}`}

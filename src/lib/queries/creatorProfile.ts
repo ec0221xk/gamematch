@@ -6,6 +6,7 @@ export interface CreatorOffering {
   categoryName: string;
   rank: string | null;
   price: number;
+  unit: string;
   description: string | null;
 }
 
@@ -25,6 +26,7 @@ type RawOfferingRow = {
   id: string;
   rank: string | null;
   price: number;
+  unit: string;
   description: string | null;
   game: { name: string } | null;
   category: { name: string } | null;
@@ -50,7 +52,7 @@ export async function getCreatorProfile(
     supabase
       .from("creator_games")
       .select(
-        "id, rank, price, description, game:games(name), category:categories(name)",
+        "id, rank, price, unit, description, game:games(name), category:categories(name)",
       )
       .eq("creator_id", creatorId)
       .order("created_at", { ascending: false })
@@ -84,6 +86,7 @@ export async function getCreatorProfile(
       categoryName: row.category?.name ?? "",
       rank: row.rank,
       price: row.price,
+      unit: row.unit,
       description: row.description,
     })),
   };
