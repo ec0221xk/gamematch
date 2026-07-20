@@ -1,4 +1,5 @@
 import { HeroIllustration } from "./HeroIllustration";
+import { ButtonLink } from "@/components/ui";
 
 export function Hero() {
   return (
@@ -13,12 +14,20 @@ export function Hero() {
           <div className="flex-1 text-center sm:text-left">
             <h1 className="font-semibold text-gray-900"
               style={{ fontSize: "clamp(2rem, 4.5vw, 3.25rem)", lineHeight: 1.15, letterSpacing: "-0.025em" }}>
-              ゲームの時間を、<br />特別な体験に。
+              好きなCreatorと、<br />安心して遊べる。
             </h1>
             <p className="mt-5 text-gray-500 sm:mx-0"
               style={{ fontSize: "1.1rem", lineHeight: 1.75 }}>
-              推しのCreatorと遊ぶ。上手い人に教わる。
+              推しとゲームを楽しみたい人も、もっと上手くなりたい人も。<br className="hidden sm:block" />あなたに合ったCreatorが見つかります。
             </p>
+            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:items-start">
+              <ButtonLink href="/creators" size="lg" className="whitespace-nowrap">
+                Creatorを探す
+              </ButtonLink>
+              <ButtonLink href="/how-it-works" size="lg" variant="outline" className="whitespace-nowrap">
+                使い方を見る
+              </ButtonLink>
+            </div>
           </div>
           <div className="w-full max-w-xs sm:max-w-none sm:flex-1">
             <HeroIllustration />
