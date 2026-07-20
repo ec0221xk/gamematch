@@ -25,7 +25,7 @@ export function CreatorCard({ data }: CreatorCardProps) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="brand">{data.categoryName}</Badge>
-          {data.rank && <Badge variant="outline">{data.rank}</Badge>}
+          {data.rank && <Badge variant="outline">ランク：{data.rank}</Badge>}
         </div>
         <p className="mt-auto text-sm font-medium text-gray-900">
           ¥{data.price.toLocaleString()}

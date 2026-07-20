@@ -1,4 +1,5 @@
 import { Hero } from "@/components/marketing/Hero";
+import { TwoPillars } from "@/components/marketing/TwoPillars";
 import { FilterTabs } from "@/components/marketing/FilterTabs";
 import { FeaturedCreators } from "@/components/marketing/FeaturedCreators";
 import { SearchNav } from "@/components/marketing/SearchNav";
@@ -10,6 +11,7 @@ import { getFeaturedCreators } from "@/lib/queries/creators";
 /**
  * 最終セクション順:
  * Hero(CTA1つ・シンプル)
+ * → TwoPillars(推し活/コーチングの2本柱訴求)
  * → FilterTabs(ゲーム+カテゴリ2段タブ → /creatorsへ遷移)
  * → FeaturedCreators(注目Creator)
  * → SearchNav(3導線カード)
@@ -25,6 +27,7 @@ export default async function Home() {
   return (
     <main>
       <Hero />
+      <TwoPillars />
       <FilterTabs />
       <FeaturedCreators creators={creators} />
       <SearchNav />

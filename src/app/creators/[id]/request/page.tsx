@@ -81,7 +81,7 @@ export default async function RequestPage({
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Badge variant="brand">{offering.categoryName}</Badge>
-          {offering.rank && <Badge variant="outline">{offering.rank}</Badge>}
+          {offering.rank && <Badge variant="outline">ランク：{offering.rank}</Badge>}
         </div>
         <p className="mt-3 text-sm font-semibold text-gray-900">
           ¥{offering.price.toLocaleString()}

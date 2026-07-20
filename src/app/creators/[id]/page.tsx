@@ -62,7 +62,7 @@ export default async function CreatorDetailPage({
                   </span>
                   <Badge variant="brand">{offering.categoryName}</Badge>
                   {offering.rank && (
-                    <Badge variant="outline">{offering.rank}</Badge>
+                    <Badge variant="outline">ランク：{offering.rank}</Badge>
                   )}
                 </div>
                 {offering.description && (

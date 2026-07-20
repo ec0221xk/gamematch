@@ -18,7 +18,7 @@ const SAMPLE_CREATORS: SampleCreator[] = [
     price: 1500,
     categoryName: "一緒に遊ぶ",
     bio: "ランクマをフレンドリーに一緒に回ります。初心者大歓迎！ポジショニングを優しく解説します。",
-    tags: ["VC対応", "初心者歓迎"],
+    tags: ["ボイスチャット対応", "初心者歓迎"],
   },
   {
     id: "sample-2", creatorId: "sample-2",
@@ -29,7 +29,7 @@ const SAMPLE_CREATORS: SampleCreator[] = [
     price: 2000,
     categoryName: "コーチング",
     bio: "エイム・立ち回りを丁寧に解説。伸び悩んでいる方のランク帯に合わせてカスタマイズします。",
-    tags: ["Discord対応", "丁寧な解説"],
+    tags: ["ボイスチャット対応", "丁寧な解説"],
   },
   {
     id: "sample-3", creatorId: "sample-3",
@@ -40,7 +40,7 @@ const SAMPLE_CREATORS: SampleCreator[] = [
     price: 1800,
     categoryName: "ランクアップ支援",
     bio: "目標ランクまで最短ルートで伴走します。メンタルサポートも大切にしています！",
-    tags: ["VC対応", "女性Creator"],
+    tags: ["ボイスチャット対応", "女性Creator"],
   },
 ];
 
@@ -51,7 +51,7 @@ interface FeaturedCreatorsProps {
 export function FeaturedCreators({ creators }: FeaturedCreatorsProps) {
   const isReal = creators.length > 0;
   const displayCreators: SampleCreator[] = isReal
-    ? creators.slice(0, 3).map((c) => ({ ...c, bio: "", tags: ["Discord対応"] }))
+    ? creators.slice(0, 3).map((c) => ({ ...c, bio: "", tags: ["ボイスチャット対応"] }))
     : SAMPLE_CREATORS;
 
   return (
@@ -99,7 +99,7 @@ export function FeaturedCreators({ creators }: FeaturedCreatorsProps) {
               {/* カテゴリ・ランクバッジ */}
               <div className="flex flex-wrap gap-2">
                 <Badge variant="brand">{creator.categoryName}</Badge>
-                {creator.rank && <Badge variant="outline">{creator.rank}</Badge>}
+                {creator.rank && <Badge variant="outline">ランク：{creator.rank}</Badge>}
               </div>
 
               {/* ステータスタグ(実績数値の代わり) */}
@@ -115,15 +115,20 @@ export function FeaturedCreators({ creators }: FeaturedCreatorsProps) {
               {/* 料金とCTA */}
               <div className="flex items-center justify-between mt-auto border-t border-gray-50 pt-4">
                 <div>
-                  <span className="font-bold text-gray-900" style={{ fontSize: "18px" }}>
-                    ¥{creator.price.toLocaleString()}
-                  </span>
-                  <span className="ml-1 text-xs text-gray-400">/ 1回</span>
+                  <div>
+                    <span className="font-bold text-gray-900" style={{ fontSize: "18px" }}>
+                      ¥{creator.price.toLocaleString()}
+                    </span>
+                    <span className="ml-1 text-xs text-gray-400">/ 1回</span>
+                  </div>
+                  <p className="mt-0.5 text-[10px] text-gray-400">
+                    ※料金はCreatorとの合意後に確定します
+                  </p>
                 </div>
                 <ButtonLink
                   href={isReal ? `/creators/${creator.creatorId}` : "/signup"}
                   size="sm">
-                  無料で申し込む
+                  申し込む
                 </ButtonLink>
               </div>
             </div>
