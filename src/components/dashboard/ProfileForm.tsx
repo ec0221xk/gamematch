@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Button, Input, Textarea } from "@/components/ui";
+import { Avatar, Button, Input, Textarea } from "@/components/ui";
+
+const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2MB
+const ALLOWED_AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 interface ProfileFormProps {
   initialValues: {
@@ -12,6 +15,7 @@ interface ProfileFormProps {
     discordId: string;
     country: string;
     languages: string[];
+    avatarUrl: string | null;
   };
 }
 
@@ -30,9 +34,36 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
   const [languages, setLanguages] = useState(
     initialValues.languages.join(", "),
   );
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(
+    initialValues.avatarUrl,
+  );
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+      setError("画像形式はPNG・JPEG・WebPのいずれかを選択してください。");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_AVATAR_SIZE) {
+      setError("画像サイズは2MB以内にしてください。");
+      event.target.value = "";
+      return;
+    }
+
+    setError(null);
+    setAvatarFile(file);
+    setAvatarPreviewUrl(URL.createObjectURL(file));
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -50,6 +81,28 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
       return;
     }
 
+    let avatarUrl = initialValues.avatarUrl;
+
+    if (avatarFile) {
+      const ext = avatarFile.name.split(".").pop();
+      const path = `${user.id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(path, avatarFile, { contentType: avatarFile.type });
+
+      if (uploadError) {
+        setError(`画像のアップロードに失敗しました: ${uploadError.message}`);
+        setIsLoading(false);
+        return;
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(path);
+      avatarUrl = publicUrl;
+    }
+
     const languageList = languages
       .split(",")
       .map((lang) => lang.trim())
@@ -63,6 +116,7 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
         discord_id: discordId.trim() || null,
         country: country.trim() || null,
         languages: languageList,
+        profile_image_url: avatarUrl,
       })
       .eq("id", user.id);
 
@@ -72,6 +126,7 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
       return;
     }
 
+    setAvatarFile(null);
     setSuccess(true);
     setIsLoading(false);
     router.refresh();
@@ -79,6 +134,21 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="flex items-center gap-4">
+        <Avatar src={avatarPreviewUrl} alt={displayName || "avatar"} size="lg" />
+        <div>
+          <label className="inline-flex cursor-pointer items-center rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            画像を選択
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={handleAvatarChange}
+              className="hidden"
+            />
+          </label>
+          <p className="mt-1 text-xs text-gray-400">PNG・JPEG・WebP / 2MBまで</p>
+        </div>
+      </div>
       <Input
         label="表示名"
         value={displayName}

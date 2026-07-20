@@ -20,6 +20,7 @@ type ProfileData = {
   display_name: string;
   bio: string | null;
   discord_id: string | null;
+  profile_image_url: string | null;
   country: string | null;
   languages: string[];
   is_creator: boolean;
@@ -33,7 +34,9 @@ async function getPageData(userId: string) {
   const [profileResult, offeringsResult, games, categories] = await Promise.all([
     supabase
       .from("profiles")
-      .select("display_name, bio, discord_id, country, languages, is_creator")
+      .select(
+        "display_name, bio, discord_id, profile_image_url, country, languages, is_creator",
+      )
       .eq("id", userId)
       .single(),
     supabase
@@ -92,6 +95,7 @@ export default async function ProfileDashboardPage() {
               discordId: profile.discord_id ?? "",
               country: profile.country ?? "",
               languages: profile.languages ?? [],
+              avatarUrl: profile.profile_image_url,
             }}
           />
         </Card>
