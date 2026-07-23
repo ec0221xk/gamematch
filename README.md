@@ -92,14 +92,16 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=コピーしたanon publicキー
 
 `.env.local` はパスワードと同じ重要な情報なので、GitHubなどに公開しないよう注意してください(`.gitignore`で既に除外設定済みです)。
 
-### 5. メール確認(Confirm email)をOFFにする
+### 5. メール確認(Confirm email)の設定
 
-MVPでは「登録したらすぐ使える」ことを優先するため、確認メールのクリックを必須にしない設定にします。
+「Confirm email」は、登録後すぐ使える体験を優先するならOFF、実在するメールアドレスかを確認したいならONを選んでください。どちらでもアプリは動作します。
 
 1. 左メニューの「Authentication」→「Providers」→「Email」を開きます。
-2. 「Confirm email」のスイッチをOFFにして保存します。
+2. 「Confirm email」のスイッチをOFF/ONのお好みの状態にして保存します。
 
-この設定をOFFにしておくと、会員登録した直後にログイン状態になり、プロフィール情報もすぐに作成されます。ONのままにしておきたい場合は、登録後に届く確認メールのリンクをクリックしてからログインする必要があります(その場合もアプリは動作しますが、登録直後にプロフィールが自動作成されない点だけ異なります)。
+- OFFの場合: 会員登録した直後にログイン状態になり、プロフィール情報もすぐに作成されます。
+- ONの場合: 登録後に届く確認メールのリンクをクリックすると`/welcome`(ようこそページ)に自動的に遷移し、その時点でプロフィールも作成されます。この場合、以下の設定も必要です。
+  1. 「Authentication」→「URL Configuration」→「Redirect URLs」に、開発環境なら`http://localhost:3000/auth/callback`、本番環境ならデプロイ先の`https://(本番ドメイン)/auth/callback`を追加登録してください。未登録だとメールリンクのリダイレクトが失敗します。
 
 ## セットアップ手順
 
@@ -193,12 +195,13 @@ gitが入っていない場合は [https://git-scm.com/downloads](https://git-sc
 
 「Deploy」ボタンを押すとビルドが始まります。1〜2分待つと、`https://(プロジェクト名).vercel.app` のようなURLでアプリが公開されます。
 
-### 5. SupabaseのSite URLを更新する(推奨)
+### 5. SupabaseのSite URL / Redirect URLsを更新する(推奨)
 
-将来パスワード再設定機能などを使う場合に備えて、本番URLを登録しておきます。
+将来パスワード再設定機能などを使う場合に備えて、本番URLを登録しておきます。Confirm emailをONにしている場合はこの設定が必須です。
 
 1. Supabaseダッシュボードの「Authentication」→「URL Configuration」を開きます。
 2. 「Site URL」を、Vercelで発行された本番URL(`https://(プロジェクト名).vercel.app`)に変更して保存します。
+3. 「Redirect URLs」に`https://(プロジェクト名).vercel.app/auth/callback`を追加登録します。
 
 ### コードを更新したいとき
 

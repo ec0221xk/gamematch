@@ -30,6 +30,10 @@ export function SignupForm() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/welcome`,
+        data: { display_name: displayName },
+      },
     });
 
     if (signUpError) {
@@ -40,7 +44,7 @@ export function SignupForm() {
 
     // SupabaseプロジェクトでEmail確認(Confirm email)がONになっている場合、
     // ここではまだセッションが発行されない。
-    // MVPでは「まず動くこと」を優先するため、READMEの手順に従いConfirm emailをOFFにする想定。
+    // その場合はメール内のリンク→/auth/callbackでセッション確立とprofiles作成を行う。
     if (!data.session || !data.user) {
       setNotice(
         "確認メールを送信しました。メール内のリンクをクリックしたうえでログインしてください。",
