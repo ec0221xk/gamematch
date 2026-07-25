@@ -21,16 +21,20 @@
   - /dashboard/requests：Creatorの申込一覧＋承認/辞退ボタン
   - /dashboard/my-requests：Playerの申込状況（ステータスバッジ表示）
   - Header.tsxのログイン時ナビに「受け取った申込」（Creatorのみ表示）「申込状況」を追加
+- Playerが申込んだ時のCreatorへのメール通知を実装済み：
+  - src/lib/supabase/admin.ts（service roleクライアント、server-onlyでクライアント側importをブロック）
+  - src/app/api/bookings/notify/route.ts（Next.js Route HandlerからResend APIを直接呼ぶ方式。Edge Function+Webhookは不採用）
+  - BookingFormがinsert直後にこのAPIをawait呼び出し（通知失敗時はcatchで握りつぶし、申込自体の成立には影響しない設計）
+  - ただし環境変数 SUPABASE_SERVICE_ROLE_KEY と RESEND_API_KEY が未設定のため、実際にはまだ送信されない（下記「次回やること」参照）
 
-## 次回の最優先課題（マッチング成立後の連絡導線）
-申込の「見る画面」（一覧・承認/辞退）はできたが、Creatorは能動的に/dashboard/requestsを開かないと申込に気づけない。次はこの通知の穴を埋める。
-実装順：
-1. メール通知（Playerが申込んだ時にCreatorへ、Creatorが承認/辞退した時にPlayerへ）。規模：中〜大。ResendはSMTP経路のみ接続済みでAPI直接呼び出しは未実装のため、Edge Function+Webhook等が別途必要（詳細は下記注意事項）。独自ドメイン取得＋Resendドメイン認証も前提条件
-2. 承認後のやり取り導線（Discord IDは既にprofilesにあるが、bookings画面から直接見える形になっていない。承認後にCreatorのDiscord IDをPlayerに表示する等、実際に約束を取り付けられる導線を検討）
+## 次回やること
+1. 環境変数の設定：.env.localに SUPABASE_SERVICE_ROLE_KEY（Supabaseのservice_roleキー）と RESEND_API_KEY（ResendのAPIキー）を追加。あわせてVercelの環境変数（Production/Preview）にも同じ2つを追加
+2. 独自ドメイン取得＋Resendドメイン認証（現状onboarding@resend.devのテスト送信元のため、Resendアカウント登録メール宛にしか届かない）
+3. 1・2が揃ったら実受信テスト（テスト用CreatorのメールをResend登録メールに合わせて送信確認→本番ドメインでの送信に切替）
+4. 承認後のやり取り導線（Discord IDは既にprofilesにあるが、bookings画面から直接見える形になっていない。承認後にCreatorのDiscord IDをPlayerに表示する等、実際に約束を取り付けられる導線を検討）
 
 ## 注意事項
-- ResendのSMTP接続は「Supabase Authが送るメール」の経路変更のみ。申込通知のようなアプリ独自メールはResend APIを直接呼ぶ実装（Edge Function+Webhook等）が別途必要。CreatorのメアドはprofilesになくauthusersにあるためservicRole経由が要る
-- 独自ドメイン未取得。Resendはテストモードで、登録済みアドレス宛にしか送れない。公開前にドメイン取得＋Resendドメイン認証が必須
+- 独自ドメイン未取得。Resendはテストモードで、アカウント登録メール宛にしか送れない。公開前にドメイン取得＋Resendドメイン認証が必須
 - Supabase無料プランは7日アクセスがないとプロジェクトが自動停止する
 - スキーマ変更は「先にDBへSQL適用→その後コードpush」の順が安全
 - トップの「あおい/ゆうき/みお」等はサンプルデータで実在Creatorではない

@@ -40,19 +40,35 @@ export function BookingForm({ offering }: BookingFormProps) {
       return;
     }
 
-    const { error: insertError } = await supabase.from("bookings").insert({
-      user_id: user.id,
-      creator_id: offering.creatorId,
-      creator_game_id: offering.id,
-      category_id: offering.categoryId,
-      price: offering.price,
-      message: message.trim() || null,
-    });
+    const { data: inserted, error: insertError } = await supabase
+      .from("bookings")
+      .insert({
+        user_id: user.id,
+        creator_id: offering.creatorId,
+        creator_game_id: offering.id,
+        category_id: offering.categoryId,
+        price: offering.price,
+        message: message.trim() || null,
+      })
+      .select()
+      .single();
 
-    if (insertError) {
-      setError(`送信に失敗しました: ${insertError.message}`);
+    if (insertError || !inserted) {
+      setError(`送信に失敗しました: ${insertError?.message}`);
       setIsLoading(false);
       return;
+    }
+
+    // 通知メールの送信に失敗しても申込自体は成立しているため、
+    // ここでのエラーは無視してそのまま完了画面へ進む。
+    try {
+      await fetch("/api/bookings/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: inserted.id }),
+      });
+    } catch {
+      // ネットワークエラー等は無視する。
     }
 
     const params = new URLSearchParams({ creator: offering.creatorName });
