@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
-type BadgeVariant = "default" | "brand" | "outline";
+type BadgeVariant = "default" | "brand" | "outline" | "danger";
 
 interface BadgeProps {
   children: ReactNode;
@@ -13,6 +13,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   default: "bg-gray-100 text-gray-700",
   brand: "bg-brand-50 text-brand-700",
   outline: "border border-gray-300 text-gray-600",
+  danger: "bg-red-50 text-red-700",
 };
 
 /**

@@ -16,13 +16,17 @@
 - Resend経由のSMTPをSupabase Authに接続（無料枠のメール制限を解消）
 - オンボーディング導線（/auth/callback新設→メール認証後に/welcomeへ着地。表示名保存バグも修正）
 - 実地テスト完了：新規登録→メール認証→/welcome→出品→申込 まで一周動作確認済み
+- 申込（bookings）まわりを実装・動作確認済み：
+  - bookingsのUPDATE用RLS追加（creator_idが自分＆pending中の行のみ、statusはaccepted/declinedにのみ更新可）
+  - /dashboard/requests：Creatorの申込一覧＋承認/辞退ボタン
+  - /dashboard/my-requests：Playerの申込状況（ステータスバッジ表示）
+  - Header.tsxのログイン時ナビに「受け取った申込」（Creatorのみ表示）「申込状況」を追加
 
-## 次回の最優先課題（マッチング不成立の致命的な穴）
-Playerが申込してもCreatorが気づく手段が無い。bookingsテーブル・ステータス型（pending/accepted/declined/completed）・CreatorがSELECTできるRLSは既に存在。足りないのは「見る画面」だけ。
+## 次回の最優先課題（マッチング成立後の連絡導線）
+申込の「見る画面」（一覧・承認/辞退）はできたが、Creatorは能動的に/dashboard/requestsを開かないと申込に気づけない。次はこの通知の穴を埋める。
 実装順：
-1. Creatorの申込一覧（/dashboard/requests、規模：小〜中。承認/辞退まで作るならbookingsのUPDATE用RLS追加が必要）
-2. Playerの申込状況（/dashboard/my-requests、規模：小、①のクエリ流用）
-3. メール通知（規模：中〜大、後回し）
+1. メール通知（Playerが申込んだ時にCreatorへ、Creatorが承認/辞退した時にPlayerへ）。規模：中〜大。ResendはSMTP経路のみ接続済みでAPI直接呼び出しは未実装のため、Edge Function+Webhook等が別途必要（詳細は下記注意事項）。独自ドメイン取得＋Resendドメイン認証も前提条件
+2. 承認後のやり取り導線（Discord IDは既にprofilesにあるが、bookings画面から直接見える形になっていない。承認後にCreatorのDiscord IDをPlayerに表示する等、実際に約束を取り付けられる導線を検討）
 
 ## 注意事項
 - ResendのSMTP接続は「Supabase Authが送るメール」の経路変更のみ。申込通知のようなアプリ独自メールはResend APIを直接呼ぶ実装（Edge Function+Webhook等）が別途必要。CreatorのメアドはprofilesになくauthusersにあるためservicRole経由が要る
