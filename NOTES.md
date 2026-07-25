@@ -25,13 +25,12 @@
   - src/lib/supabase/admin.ts（service roleクライアント、server-onlyでクライアント側importをブロック）
   - src/app/api/bookings/notify/route.ts（Next.js Route HandlerからResend APIを直接呼ぶ方式。Edge Function+Webhookは不採用）
   - BookingFormがinsert直後にこのAPIをawait呼び出し（通知失敗時はcatchで握りつぶし、申込自体の成立には影響しない設計）
-  - ただし環境変数 SUPABASE_SERVICE_ROLE_KEY と RESEND_API_KEY が未設定のため、実際にはまだ送信されない（下記「次回やること」参照）
+  - .env.localに SUPABASE_SERVICE_ROLE_KEY と RESEND_API_KEY を設定し、開発環境で実受信テスト成功済み（ResendアカウントのメールアドレスとCreatorのメールを一致させて送信→受信確認）
 
 ## 次回やること
-1. 環境変数の設定：.env.localに SUPABASE_SERVICE_ROLE_KEY（Supabaseのservice_roleキー）と RESEND_API_KEY（ResendのAPIキー）を追加。あわせてVercelの環境変数（Production/Preview）にも同じ2つを追加
-2. 独自ドメイン取得＋Resendドメイン認証（現状onboarding@resend.devのテスト送信元のため、Resendアカウント登録メール宛にしか届かない）
-3. 1・2が揃ったら実受信テスト（テスト用CreatorのメールをResend登録メールに合わせて送信確認→本番ドメインでの送信に切替）
-4. 承認後のやり取り導線（Discord IDは既にprofilesにあるが、bookings画面から直接見える形になっていない。承認後にCreatorのDiscord IDをPlayerに表示する等、実際に約束を取り付けられる導線を検討）
+1. Vercel側の環境変数（Production/Preview）に SUPABASE_SERVICE_ROLE_KEY と RESEND_API_KEY を追加。これが未設定のため、本番ではまだ通知メールが飛ばない
+2. 独自ドメイン取得＋Resendドメイン認証（現状onboarding@resend.devのテスト送信元のため、Resendアカウント登録メール宛にしか届かない。ドメイン認証すれば任意のCreatorのメール宛に届くようになる）
+3. 承認後のやり取り導線（Discord IDは既にprofilesにあるが、bookings画面から直接見える形になっていない。承認後にCreatorのDiscord IDをPlayerに表示する等、実際に約束を取り付けられる導線を検討）
 
 ## 注意事項
 - 独自ドメイン未取得。Resendはテストモードで、アカウント登録メール宛にしか送れない。公開前にドメイン取得＋Resendドメイン認証が必須
