@@ -6,8 +6,8 @@ const footerLinks = [
   { label: "安心して利用するために", href: "/safety" },
   { label: "GameMatchについて", href: "/about" },
   { label: "お問い合わせ", href: "/contact" },
-  { label: "利用規約", href: "/legal/terms" },
-  { label: "プライバシーポリシー", href: "/legal/privacy" },
+  { label: "利用規約", href: "/terms" },
+  { label: "プライバシーポリシー", href: "/privacy" },
 ];
 
 export function Footer() {
