@@ -8,6 +8,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * (Creator/User兼任のため、role別の細かい権限分岐はここでは行わない)。
  * - /dashboard配下(マイページ)
  * - /creators/:id/request(申込フォーム)
+ * - /creators/:id/report(通報フォーム)
  */
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next({
@@ -40,7 +41,7 @@ export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const isProtectedRoute =
     pathname.startsWith("/dashboard") ||
-    /^\/creators\/[^/]+\/request$/.test(pathname);
+    /^\/creators\/[^/]+\/(request|report)$/.test(pathname);
 
   if (!user && isProtectedRoute) {
     const loginUrl = new URL("/login", request.url);

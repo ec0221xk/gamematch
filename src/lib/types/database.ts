@@ -8,6 +8,11 @@
  */
 
 export type BookingStatus = "pending" | "accepted" | "declined" | "completed";
+export type ReportReason =
+  | "inappropriate_behavior"
+  | "solicitation"
+  | "fraud"
+  | "other";
 
 export type Database = {
   public: {
@@ -121,6 +126,25 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["bookings"]["Insert"]>;
       };
+      reports: {
+        Row: {
+          id: string;
+          reporter_id: string;
+          reported_user_id: string;
+          reason: ReportReason;
+          detail: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          reporter_id: string;
+          reported_user_id: string;
+          reason: ReportReason;
+          detail?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["reports"]["Insert"]>;
+      };
     };
     Views: {
       creator_stats: {
@@ -132,6 +156,7 @@ export type Database = {
     };
     Enums: {
       booking_status: BookingStatus;
+      report_reason: ReportReason;
     };
   };
 };

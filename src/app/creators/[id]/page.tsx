@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar, Badge, ButtonLink, Card } from "@/components/ui";
 import { getCreatorProfile } from "@/lib/queries/creatorProfile";
+import { createClient } from "@/lib/supabase/server";
 
 interface CreatorDetailPageProps {
   params: { id: string };
@@ -14,6 +16,12 @@ export default async function CreatorDetailPage({
   if (!creator) {
     notFound();
   }
+
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isOwnProfile = user?.id === creator.id;
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
@@ -92,6 +100,14 @@ export default async function CreatorDetailPage({
             現在提供中のサービスはありません。
           </p>
         </div>
+      )}
+
+      {!isOwnProfile && (
+        <p className="mt-10 text-center text-xs text-gray-400">
+          <Link href={`/creators/${creator.id}/report`} className="hover:underline">
+            このユーザーを通報する
+          </Link>
+        </p>
       )}
     </main>
   );
