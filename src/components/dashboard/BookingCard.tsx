@@ -50,6 +50,19 @@ export function BookingCard({
   const [pendingAction, setPendingAction] = useState<
     "accepted" | "declined" | null
   >(null);
+  const [copied, setCopied] = useState(false);
+
+  const isPlayerView = otherPartyLabel === "依頼先";
+
+  async function handleCopyDiscordId(discordId: string) {
+    try {
+      await navigator.clipboard.writeText(discordId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // クリップボードAPIが使えない環境では何もしない
+    }
+  }
 
   async function updateStatus(next: "accepted" | "declined") {
     setError(null);
@@ -100,6 +113,36 @@ export function BookingCard({
       </p>
 
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+
+      {isPlayerView && status === "accepted" && (
+        <div className="mt-4 rounded-md bg-brand-50 p-3 text-sm">
+          {booking.otherPartyDiscordId ? (
+            <>
+              <p className="text-brand-700">
+                承認されました。以下のDiscordで連絡してください。
+              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <span className="font-mono text-brand-900">
+                  {booking.otherPartyDiscordId}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    handleCopyDiscordId(booking.otherPartyDiscordId!)
+                  }
+                >
+                  {copied ? "コピーしました" : "コピー"}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <p className="text-brand-700">
+              Creatorがまだ連絡先を設定していません。しばらくお待ちください。
+            </p>
+          )}
+        </div>
+      )}
 
       {showActions && status === "pending" && (
         <div className="mt-4 flex gap-2">

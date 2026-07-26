@@ -4,6 +4,8 @@ import type { BookingStatus } from "@/lib/types/database";
 export interface BookingSummary {
   id: string;
   otherPartyName: string;
+  /** 承認済み(accepted)の申込でのみ値が入る。それ以外は必ずnull(承認前の連絡先漏洩防止)。 */
+  otherPartyDiscordId: string | null;
   gameName: string;
   categoryName: string;
   price: number;
@@ -21,13 +23,15 @@ type RawBookingRow = {
   created_at: string;
   category: { name: string } | null;
   creator_game: { unit: string; game: { name: string } | null } | null;
-  other_party: { display_name: string } | null;
+  other_party: { display_name: string; discord_id?: string | null } | null;
 };
 
 function mapBookingRow(row: RawBookingRow): BookingSummary {
   return {
     id: row.id,
     otherPartyName: row.other_party?.display_name ?? "不明なユーザー",
+    otherPartyDiscordId:
+      row.status === "accepted" ? row.other_party?.discord_id ?? null : null,
     gameName: row.creator_game?.game?.name ?? "不明なゲーム",
     categoryName: row.category?.name ?? "-",
     price: row.price,
@@ -73,7 +77,9 @@ export async function getSentBookings(userId: string): Promise<BookingSummary[]>
 
   const { data, error } = await supabase
     .from("bookings")
-    .select(`${BOOKING_SELECT}, other_party:profiles!creator_id(display_name)`)
+    .select(
+      `${BOOKING_SELECT}, other_party:profiles!creator_id(display_name, discord_id)`,
+    )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .returns<RawBookingRow[]>();
