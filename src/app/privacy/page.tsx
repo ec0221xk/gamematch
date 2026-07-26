@@ -118,7 +118,7 @@ export default function PrivacyPage() {
               </p>
             ))}
             {article.list && (
-              <ol className="mt-2 flex flex-col gap-1.5">
+              <ol className="mt-2 flex list-none flex-col gap-1.5">
                 {article.list.map((item, index) => (
                   <li key={item} className="flex gap-2 text-sm leading-relaxed text-gray-600">
                     <span className="shrink-0 text-gray-400">{index + 1}.</span>
