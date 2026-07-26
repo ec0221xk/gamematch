@@ -26,11 +26,13 @@
   - src/app/api/bookings/notify/route.ts（Next.js Route HandlerからResend APIを直接呼ぶ方式。Edge Function+Webhookは不採用）
   - BookingFormがinsert直後にこのAPIをawait呼び出し（通知失敗時はcatchで握りつぶし、申込自体の成立には影響しない設計）
   - .env.localに SUPABASE_SERVICE_ROLE_KEY と RESEND_API_KEY を設定し、開発環境で実受信テスト成功済み（ResendアカウントのメールアドレスとCreatorのメールを一致させて送信→受信確認）
+- 承認後の連絡導線を実装・動作確認済み：Player→Creator一方向。承認後（status=accepted）のみBookingCardにCreatorのDiscord IDと案内文、コピーボタンを表示。Discord ID未設定時は「Creatorがまだ連絡先を設定していません」の案内を表示。承認前は表示されないことも確認済み
+- 実地テストで「探す→申込→通知→承認→連絡先表示→やり取り」の一周が実データで通ることを確認済み
 
 ## 次回やること
-1. Vercel側の環境変数（Production/Preview）に SUPABASE_SERVICE_ROLE_KEY と RESEND_API_KEY を追加。これが未設定のため、本番ではまだ通知メールが飛ばない
-2. 独自ドメイン取得＋Resendドメイン認証（現状onboarding@resend.devのテスト送信元のため、Resendアカウント登録メール宛にしか届かない。ドメイン認証すれば任意のCreatorのメール宛に届くようになる）
-3. 承認後のやり取り導線（Discord IDは既にprofilesにあるが、bookings画面から直接見える形になっていない。承認後にCreatorのDiscord IDをPlayerに表示する等、実際に約束を取り付けられる導線を検討）
+1. 独自ドメイン取得＋Resendドメイン認証（本番で任意のCreatorのメール宛にも通知メールを届けるため。現状onboarding@resend.devのテスト送信元のため、Resendアカウント登録メール宛にしか届かない）
+2. 本番での通知メール実受信テスト（前提としてVercel側の環境変数〔Production/Preview〕に SUPABASE_SERVICE_ROLE_KEY と RESEND_API_KEY を追加する作業も未実施）
+3. （将来）双方向の連絡導線：現状はPlayer→Creator一方向（承認後にCreatorのDiscord IDのみPlayerへ表示）。Creator側からもPlayerの連絡先を見せる場合は別途検討
 
 ## 注意事項
 - 独自ドメイン未取得。Resendはテストモードで、アカウント登録メール宛にしか送れない。公開前にドメイン取得＋Resendドメイン認証が必須
