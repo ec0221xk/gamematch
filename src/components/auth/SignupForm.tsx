@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Input } from "@/components/ui";
@@ -17,6 +18,7 @@ export function SignupForm() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,8 +27,17 @@ export function SignupForm() {
     event.preventDefault();
     setError(null);
     setNotice(null);
+
+    if (!agreed) {
+      setError("利用規約・プライバシーポリシーへの同意と、18歳以上であることの確認が必要です。");
+      return;
+    }
+
     setIsLoading(true);
 
+    // 同意したことのDB保存は行わない(現状agreedカラムが無く、今回はスキーマ変更なしで
+    // フロント側の登録阻止のみで対応する方針。証跡を残す必要が出た場合は
+    // profilesにterms_agreed_at等のカラムを追加して保存する想定)。
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -99,9 +110,37 @@ export function SignupForm() {
         value={password}
         onChange={(event) => setPassword(event.target.value)}
       />
+      <label className="flex items-start gap-2 text-sm text-gray-600">
+        <input
+          type="checkbox"
+          checked={agreed}
+          onChange={(event) => setAgreed(event.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+        />
+        <span>
+          <Link
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-brand-600 hover:underline"
+          >
+            利用規約
+          </Link>
+          ・
+          <Link
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-brand-600 hover:underline"
+          >
+            プライバシーポリシー
+          </Link>
+          に同意し、18歳以上であることを確認しました
+        </span>
+      </label>
       {error && <p className="text-sm text-red-600">{error}</p>}
       {notice && <p className="text-sm text-brand-700">{notice}</p>}
-      <Button type="submit" isLoading={isLoading} className="mt-2">
+      <Button type="submit" isLoading={isLoading} disabled={!agreed} className="mt-2">
         登録する
       </Button>
     </form>
