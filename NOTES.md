@@ -36,6 +36,10 @@
   - 通報したことが相手に通知される機能はなし。運営確認は引き続きSupabase Table Editorで直接行う想定（管理画面は未実装）
 - 利用規約・プライバシーポリシーのページを実装（/terms, /privacy、フッターにリンク）。ログイン不要・middlewareの保護対象外。Footer.tsxの既存リンク（旧/legal/terms, /legal/privacy）のhrefを新パスに修正
 - SignupForm.tsxに「利用規約・プライバシーポリシーに同意し、18歳以上であることを確認しました」チェックボックスを追加済み（ラベル内リンクは/terms・/privacyを別タブで開く）。未チェックだと登録ボタンがdisabled、かつ送信時にもガードして案内メッセージを表示。同意の事実はDBには保存せずフロント制御のみ（証跡が必要になったらprofilesにterms_agreed_at等を追加する想定、今回はスキーマ変更なしの方針で対応）
+- 公開前の粗さ調査（空状態・エラー時・ローディング表示）を実施し、エラー処理の改善（まとまりA）を実装済み：
+  - フォーム系のエラーメッセージ日本語化：src/lib/utils/errorMessage.ts の toUserErrorMessage() ヘルパーを新設。Supabaseの生の英語エラーメッセージ（"User already registered"等）を固定の日本語文言にマッピングし、マッピング外は汎用フォールバック文言に。生のエラーはconsole.errorのみに出力しUIには出さない（Login/Signup/Booking/Report/Profile/Offering各フォーム、BookingCardに適用）
+  - 全送信ハンドラをtry/catchで保護：Login/Signup/Logout/Booking/Report/Profile/Offering各フォーム、BookingCard（承認・辞退）、DeleteOfferingButtonの送信・更新・削除処理をtry/catchで囲み、通信断等で例外が発生してもisLoadingがfalseに戻り「送信中...」のまま固まらないように修正。DeleteOfferingButtonはエラーハンドリングが元々皆無だったため今回新規追加
+  - 一覧クエリのResult型化：src/lib/types/query.ts に QueryResult<T> 型を新設。searchCreators/getFeaturedCreators（creators.ts）、getReceivedBookings/getSentBookings（bookings.ts）がSupabaseエラー時に空配列ではなく { ok: false } を返すよう変更し、呼び出し側（/creators、/dashboard/requests、/dashboard/my-requests、トップページのFeaturedCreators）でSupabase障害を「データ0件」の空状態と区別できるようにした。障害時は共通コンポーネント QueryErrorNotice（src/components/ui/QueryErrorNotice.tsx、赤系配色）を表示。トップページのFeaturedCreatorsのみ、失敗時はページ全体をエラーにせずセクションごと非表示にする方針（成功時0件のサンプルCreator表示は維持）
 
 ## 次回やること
 1. 独自ドメイン取得＋Resendドメイン認証（本番で任意のCreatorのメール宛にも通知メールを届けるため。現状onboarding@resend.devのテスト送信元のため、Resendアカウント登録メール宛にしか届かない）
@@ -43,6 +47,12 @@
 3. （将来）双方向の連絡導線：現状はPlayer→Creator一方向（承認後にCreatorのDiscord IDのみPlayerへ表示）。Creator側からもPlayerの連絡先を見せる場合は別途検討
 4. 通報機能のブラウザ動作確認（通報フォームの表示・送信、自己通報が弾かれること、reports_not_self制約、Table Editorでの内容確認）が未実施
 5. 規約同意チェックボックスのブラウザ動作確認（未チェック時disabled・案内表示、リンクが別タブで開くこと）が未実施
+6. エラー処理の改善（まとまりB、公開前に必ず直すべき残タスク）：
+   - サイト全体の404ページ（ルート直下に日本語のnot-found.tsxを追加。現状/creators/[id]用の1件しかなく、それ以外の存在しないURLはNext.jsデフォルトの英語404が出る）
+   - 予期しないサーバーエラー用のerror.tsx（プロジェクト全体に1つも無く、Server Componentで例外が起きると技術的なデフォルトエラー画面が露出する）
+   - 出品削除（DeleteOfferingButton）の確認ダイアログ（エラー表示は対応済みだが、削除前のconfirm相当のダイアログはまだ無い）
+   - マイページ（/dashboard/profile）でDBエラー時に404ではなくエラー表示を出す対応（現状getPageDataがエラーを判別せず、DBエラー時に本人のプロフィールが「見つかりません」扱いになってしまう）
+   - 主要ページへのloading.tsx追加（ローディング中のスケルトン/スピナー表示。現状は皆無で、データ取得が遅いと押しても無反応に見える）
 
 ## 注意事項
 - 独自ドメイン未取得。Resendはテストモードで、アカウント登録メール宛にしか送れない。公開前にドメイン取得＋Resendドメイン認証が必須

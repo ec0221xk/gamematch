@@ -1,5 +1,6 @@
 import { SearchFilter } from "@/components/creators/SearchFilter";
 import { CreatorCard } from "@/components/creators/CreatorCard";
+import { QueryErrorNotice } from "@/components/ui";
 import { searchCreators } from "@/lib/queries/creators";
 import { getActiveGames } from "@/lib/queries/games";
 import { getCategories } from "@/lib/queries/categories";
@@ -11,7 +12,7 @@ interface CreatorsPageProps {
 export default async function CreatorsPage({
   searchParams,
 }: CreatorsPageProps) {
-  const [games, categories, creators] = await Promise.all([
+  const [games, categories, creatorsResult] = await Promise.all([
     getActiveGames(),
     getCategories(),
     searchCreators({
@@ -40,9 +41,11 @@ export default async function CreatorsPage({
         />
       </div>
 
-      {creators.length > 0 ? (
+      {!creatorsResult.ok ? (
+        <QueryErrorNotice className="mt-8" />
+      ) : creatorsResult.data.length > 0 ? (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {creators.map((creator) => (
+          {creatorsResult.data.map((creator) => (
             <CreatorCard key={creator.id} data={creator} />
           ))}
         </div>

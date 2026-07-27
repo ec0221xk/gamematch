@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { QueryResult } from "@/lib/types/query";
 
 export interface CreatorCardData {
   id: string; // creator_games.id (React keyなどに使用)
@@ -51,7 +52,7 @@ function mapRows(rows: RawCreatorGameRow[]): CreatorCardData[] {
  */
 export async function getFeaturedCreators(
   limit = 4,
-): Promise<CreatorCardData[]> {
+): Promise<QueryResult<CreatorCardData[]>> {
   const supabase = createClient();
 
   const { data, error } = await supabase
@@ -63,10 +64,10 @@ export async function getFeaturedCreators(
 
   if (error || !data) {
     console.error("getFeaturedCreators error:", error);
-    return [];
+    return { ok: false };
   }
 
-  return mapRows(data);
+  return { ok: true, data: mapRows(data) };
 }
 
 export interface CreatorSearchFilters {
@@ -81,7 +82,7 @@ export interface CreatorSearchFilters {
 export async function searchCreators(
   filters: CreatorSearchFilters = {},
   limit = 24,
-): Promise<CreatorCardData[]> {
+): Promise<QueryResult<CreatorCardData[]>> {
   const supabase = createClient();
 
   let query = supabase
@@ -101,8 +102,8 @@ export async function searchCreators(
 
   if (error || !data) {
     console.error("searchCreators error:", error);
-    return [];
+    return { ok: false };
   }
 
-  return mapRows(data);
+  return { ok: true, data: mapRows(data) };
 }

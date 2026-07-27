@@ -22,14 +22,14 @@ import { getFeaturedCreators } from "@/lib/queries/creators";
  * 削除: PopularGames(FilterTabsで代替) / CategoryGrid(SearchNavで代替)
  */
 export default async function Home() {
-  const creators = await getFeaturedCreators(3);
+  const creatorsResult = await getFeaturedCreators(3);
 
   return (
     <main>
       <Hero />
       <TwoPillars />
       <FilterTabs />
-      <FeaturedCreators creators={creators} />
+      {creatorsResult.ok && <FeaturedCreators creators={creatorsResult.data} />}
       <SearchNav />
       <TrustSection />
       <HowItWorks />

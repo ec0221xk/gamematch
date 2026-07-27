@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { BookingStatus } from "@/lib/types/database";
+import type { QueryResult } from "@/lib/types/query";
 
 export interface BookingSummary {
   id: string;
@@ -51,7 +52,7 @@ const BOOKING_SELECT =
  */
 export async function getReceivedBookings(
   creatorId: string,
-): Promise<BookingSummary[]> {
+): Promise<QueryResult<BookingSummary[]>> {
   const supabase = createClient();
 
   const { data, error } = await supabase
@@ -63,17 +64,19 @@ export async function getReceivedBookings(
 
   if (error || !data) {
     console.error("getReceivedBookings error:", error);
-    return [];
+    return { ok: false };
   }
 
-  return data.map(mapBookingRow);
+  return { ok: true, data: data.map(mapBookingRow) };
 }
 
 /**
  * Playerが送った申込状況(/dashboard/my-requests)。
  * otherPartyには依頼先Creatorの表示名が入る。
  */
-export async function getSentBookings(userId: string): Promise<BookingSummary[]> {
+export async function getSentBookings(
+  userId: string,
+): Promise<QueryResult<BookingSummary[]>> {
   const supabase = createClient();
 
   const { data, error } = await supabase
@@ -87,8 +90,8 @@ export async function getSentBookings(userId: string): Promise<BookingSummary[]>
 
   if (error || !data) {
     console.error("getSentBookings error:", error);
-    return [];
+    return { ok: false };
   }
 
-  return data.map(mapBookingRow);
+  return { ok: true, data: data.map(mapBookingRow) };
 }

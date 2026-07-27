@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { BookingCard } from "@/components/dashboard/BookingCard";
+import { QueryErrorNotice } from "@/components/ui";
 import { getSentBookings } from "@/lib/queries/bookings";
 import { redirect } from "next/navigation";
 
@@ -14,7 +15,7 @@ export default async function MyRequestsPage() {
     redirect("/login?redirectTo=/dashboard/my-requests");
   }
 
-  const bookings = await getSentBookings(user.id);
+  const bookingsResult = await getSentBookings(user.id);
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
@@ -25,13 +26,15 @@ export default async function MyRequestsPage() {
         あなたがCreatorに送った申込の状況を確認できます。
       </p>
 
-      {bookings.length === 0 ? (
+      {!bookingsResult.ok ? (
+        <QueryErrorNotice className="mt-8" />
+      ) : bookingsResult.data.length === 0 ? (
         <p className="mt-8 text-sm text-gray-500">
           まだ申込はありません。
         </p>
       ) : (
         <div className="mt-8 flex flex-col gap-3">
-          {bookings.map((booking) => (
+          {bookingsResult.data.map((booking) => (
             <BookingCard
               key={booking.id}
               booking={booking}

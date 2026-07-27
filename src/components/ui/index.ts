@@ -15,3 +15,4 @@ export type { SelectProps, SelectOption } from "./Select";
 export { Badge } from "./Badge";
 export { Card } from "./Card";
 export { Avatar } from "./Avatar";
+export { QueryErrorNotice } from "./QueryErrorNotice";
