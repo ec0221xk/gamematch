@@ -16,3 +16,4 @@ export { Badge } from "./Badge";
 export { Card } from "./Card";
 export { Avatar } from "./Avatar";
 export { QueryErrorNotice } from "./QueryErrorNotice";
+export { Spinner } from "./Spinner";

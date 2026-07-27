@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/dashboard/ProfileForm";
 import { OfferingForm } from "@/components/dashboard/OfferingForm";
 import { DeleteOfferingButton } from "@/components/dashboard/DeleteOfferingButton";
-import { Badge, Card } from "@/components/ui";
+import { Badge, Card, QueryErrorNotice } from "@/components/ui";
 import { getActiveGames } from "@/lib/queries/games";
 import { getCategories } from "@/lib/queries/categories";
 import { notFound, redirect } from "next/navigation";
@@ -27,9 +27,21 @@ type ProfileData = {
   is_creator: boolean;
 };
 
+type PageData = {
+  profile: ProfileData;
+  offerings: RawOwnedOfferingRow[];
+  games: Awaited<ReturnType<typeof getActiveGames>>;
+  categories: Awaited<ReturnType<typeof getCategories>>;
+};
+
+type PageDataResult =
+  | { status: "ok"; data: PageData }
+  | { status: "not_found" }
+  | { status: "error" };
+
 // redirect()の後をTypeScriptがneverと判断する問題を避けるため
 // データ取得とレンダリングを別関数に分離する構造に変更
-async function getPageData(userId: string) {
+async function getPageData(userId: string): Promise<PageDataResult> {
   const supabase = createClient();
 
   const [profileResult, offeringsResult, games, categories] = await Promise.all([
@@ -52,11 +64,36 @@ async function getPageData(userId: string) {
     getCategories(),
   ]);
 
+  if (profileResult.error) {
+    // PGRST116: .single()で対象行が0件だったことを示すPostgRESTのエラーコード。
+    // 「本人のprofilesレコードが存在しない」場合のみ404、それ以外(接続断等)はエラー表示にする。
+    if (profileResult.error.code === "PGRST116") {
+      return { status: "not_found" };
+    }
+    console.error("ProfileDashboardPage: profile fetch failed", profileResult.error);
+    return { status: "error" };
+  }
+
+  if (!profileResult.data) {
+    return { status: "not_found" };
+  }
+
+  if (offeringsResult.error) {
+    console.error(
+      "ProfileDashboardPage: offerings fetch failed",
+      offeringsResult.error,
+    );
+    return { status: "error" };
+  }
+
   return {
-    profile: profileResult.data as ProfileData | null,
-    offerings: offeringsResult.data ?? [],
-    games,
-    categories,
+    status: "ok",
+    data: {
+      profile: profileResult.data as ProfileData,
+      offerings: offeringsResult.data ?? [],
+      games,
+      categories,
+    },
   };
 }
 
@@ -71,11 +108,24 @@ export default async function ProfileDashboardPage() {
     redirect("/login?redirectTo=/dashboard/profile");
   }
 
-  const { profile, offerings, games, categories } = await getPageData(user.id);
+  const pageDataResult = await getPageData(user.id);
 
-  if (!profile) {
+  if (pageDataResult.status === "not_found") {
     notFound();
   }
+
+  if (pageDataResult.status === "error") {
+    return (
+      <main className="mx-auto max-w-2xl px-6 py-12">
+        <h1 className="text-xl font-medium text-gray-900 sm:text-2xl">
+          マイページ
+        </h1>
+        <QueryErrorNotice className="mt-8" />
+      </main>
+    );
+  }
+
+  const { profile, offerings, games, categories } = pageDataResult.data;
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">

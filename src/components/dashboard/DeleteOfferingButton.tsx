@@ -13,6 +13,7 @@ interface DeleteOfferingButtonProps {
 export function DeleteOfferingButton({ offeringId }: DeleteOfferingButtonProps) {
   const router = useRouter();
   const supabase = createClient();
+  const [isConfirming, setIsConfirming] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,6 +30,7 @@ export function DeleteOfferingButton({ offeringId }: DeleteOfferingButtonProps) 
       if (deleteError) {
         setError(toUserErrorMessage(deleteError, "DeleteOfferingButton: delete failed"));
         setIsLoading(false);
+        setIsConfirming(false);
         return;
       }
 
@@ -36,7 +38,37 @@ export function DeleteOfferingButton({ offeringId }: DeleteOfferingButtonProps) 
     } catch (err) {
       setError(toUserErrorMessage(err, "DeleteOfferingButton: unexpected error"));
       setIsLoading(false);
+      setIsConfirming(false);
     }
+  }
+
+  if (isConfirming) {
+    return (
+      <div className="flex flex-col items-end gap-1">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">本当に削除しますか？</span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            isLoading={isLoading}
+            onClick={handleDelete}
+          >
+            削除する
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={isLoading}
+            onClick={() => setIsConfirming(false)}
+          >
+            キャンセル
+          </Button>
+        </div>
+        {error && <p className="text-xs text-red-600">{error}</p>}
+      </div>
+    );
   }
 
   return (
@@ -45,8 +77,7 @@ export function DeleteOfferingButton({ offeringId }: DeleteOfferingButtonProps) 
         type="button"
         variant="ghost"
         size="sm"
-        isLoading={isLoading}
-        onClick={handleDelete}
+        onClick={() => setIsConfirming(true)}
       >
         削除
       </Button>
