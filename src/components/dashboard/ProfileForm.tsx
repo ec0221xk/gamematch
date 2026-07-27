@@ -4,6 +4,7 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar, Button, Input, Textarea } from "@/components/ui";
+import { toUserErrorMessage } from "@/lib/utils/errorMessage";
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp"];
@@ -71,65 +72,72 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
     setSuccess(false);
     setIsLoading(true);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      setError("ログイン状態を確認できませんでした。再度ログインしてください。");
-      setIsLoading(false);
-      return;
-    }
-
-    let avatarUrl = initialValues.avatarUrl;
-
-    if (avatarFile) {
-      const ext = avatarFile.name.split(".").pop();
-      const path = `${user.id}/${Date.now()}.${ext}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(path, avatarFile, { contentType: avatarFile.type });
-
-      if (uploadError) {
-        setError(`画像のアップロードに失敗しました: ${uploadError.message}`);
+      if (!user) {
+        setError("ログイン状態を確認できませんでした。再度ログインしてください。");
         setIsLoading(false);
         return;
       }
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("avatars").getPublicUrl(path);
-      avatarUrl = publicUrl;
-    }
+      let avatarUrl = initialValues.avatarUrl;
 
-    const languageList = languages
-      .split(",")
-      .map((lang) => lang.trim())
-      .filter(Boolean);
+      if (avatarFile) {
+        const ext = avatarFile.name.split(".").pop();
+        const path = `${user.id}/${Date.now()}.${ext}`;
 
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .update({
-        display_name: displayName,
-        bio: bio.trim() || null,
-        discord_id: discordId.trim() || null,
-        country: country.trim() || null,
-        languages: languageList,
-        profile_image_url: avatarUrl,
-      })
-      .eq("id", user.id);
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(path, avatarFile, { contentType: avatarFile.type });
 
-    if (updateError) {
-      setError(`保存に失敗しました: ${updateError.message}`);
+        if (uploadError) {
+          setError(
+            toUserErrorMessage(uploadError, "ProfileForm: avatar upload failed"),
+          );
+          setIsLoading(false);
+          return;
+        }
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("avatars").getPublicUrl(path);
+        avatarUrl = publicUrl;
+      }
+
+      const languageList = languages
+        .split(",")
+        .map((lang) => lang.trim())
+        .filter(Boolean);
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          display_name: displayName,
+          bio: bio.trim() || null,
+          discord_id: discordId.trim() || null,
+          country: country.trim() || null,
+          languages: languageList,
+          profile_image_url: avatarUrl,
+        })
+        .eq("id", user.id);
+
+      if (updateError) {
+        setError(toUserErrorMessage(updateError, "ProfileForm: profile update failed"));
+        setIsLoading(false);
+        return;
+      }
+
+      setAvatarFile(null);
+      setSuccess(true);
       setIsLoading(false);
-      return;
+      router.refresh();
+    } catch (err) {
+      setError(toUserErrorMessage(err, "ProfileForm: unexpected error"));
+      setIsLoading(false);
     }
-
-    setAvatarFile(null);
-    setSuccess(true);
-    setIsLoading(false);
-    router.refresh();
   }
 
   return (

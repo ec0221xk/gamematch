@@ -62,6 +62,7 @@ export async function getReceivedBookings(
     .returns<RawBookingRow[]>();
 
   if (error || !data) {
+    console.error("getReceivedBookings error:", error);
     return [];
   }
 
@@ -85,6 +86,7 @@ export async function getSentBookings(userId: string): Promise<BookingSummary[]>
     .returns<RawBookingRow[]>();
 
   if (error || !data) {
+    console.error("getSentBookings error:", error);
     return [];
   }
 

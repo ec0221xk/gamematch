@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Input } from "@/components/ui";
+import { toUserErrorMessage } from "@/lib/utils/errorMessage";
 
 interface LoginFormProps {
   redirectTo?: string;
@@ -23,19 +24,25 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
     setError(null);
     setIsLoading(true);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (signInError) {
-      setError("メールアドレスまたはパスワードが正しくありません。");
+      if (signInError) {
+        console.error("LoginForm: signInWithPassword failed", signInError);
+        setError("メールアドレスまたはパスワードが正しくありません。");
+        setIsLoading(false);
+        return;
+      }
+
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err) {
+      setError(toUserErrorMessage(err, "LoginForm: unexpected error"));
       setIsLoading(false);
-      return;
     }
-
-    router.push(redirectTo);
-    router.refresh();
   }
 
   return (

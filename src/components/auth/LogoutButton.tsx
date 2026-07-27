@@ -17,9 +17,18 @@ export function LogoutButton(props: LogoutButtonProps) {
 
   async function handleLogout() {
     setIsLoading(true);
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("LogoutButton: signOut failed", error);
+      }
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      console.error("LogoutButton: unexpected error", err);
+      setIsLoading(false);
+    }
   }
 
   return (

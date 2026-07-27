@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Textarea } from "@/components/ui";
 import type { OfferingDetail } from "@/lib/queries/offerings";
+import { toUserErrorMessage } from "@/lib/utils/errorMessage";
 
 interface BookingFormProps {
   offering: OfferingDetail;
@@ -28,51 +29,56 @@ export function BookingForm({ offering }: BookingFormProps) {
     setError(null);
     setIsLoading(true);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      // middleware.tsで保護されているため通常は発生しないが、
-      // セッション切れなどに備えたフォールバック。
-      const redirectTo = `/creators/${offering.creatorId}/request?offering=${offering.id}`;
-      router.push(`/login?${new URLSearchParams({ redirectTo }).toString()}`);
-      return;
-    }
-
-    const { data: inserted, error: insertError } = await supabase
-      .from("bookings")
-      .insert({
-        user_id: user.id,
-        creator_id: offering.creatorId,
-        creator_game_id: offering.id,
-        category_id: offering.categoryId,
-        price: offering.price,
-        message: message.trim() || null,
-      })
-      .select()
-      .single();
-
-    if (insertError || !inserted) {
-      setError(`送信に失敗しました: ${insertError?.message}`);
-      setIsLoading(false);
-      return;
-    }
-
-    // 通知メールの送信に失敗しても申込自体は成立しているため、
-    // ここでのエラーは無視してそのまま完了画面へ進む。
     try {
-      await fetch("/api/bookings/notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId: inserted.id }),
-      });
-    } catch {
-      // ネットワークエラー等は無視する。
-    }
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    const params = new URLSearchParams({ creator: offering.creatorName });
-    router.push(`/booking/complete?${params.toString()}`);
+      if (!user) {
+        // middleware.tsで保護されているため通常は発生しないが、
+        // セッション切れなどに備えたフォールバック。
+        const redirectTo = `/creators/${offering.creatorId}/request?offering=${offering.id}`;
+        router.push(`/login?${new URLSearchParams({ redirectTo }).toString()}`);
+        return;
+      }
+
+      const { data: inserted, error: insertError } = await supabase
+        .from("bookings")
+        .insert({
+          user_id: user.id,
+          creator_id: offering.creatorId,
+          creator_game_id: offering.id,
+          category_id: offering.categoryId,
+          price: offering.price,
+          message: message.trim() || null,
+        })
+        .select()
+        .single();
+
+      if (insertError || !inserted) {
+        setError(toUserErrorMessage(insertError, "BookingForm: booking insert failed"));
+        setIsLoading(false);
+        return;
+      }
+
+      // 通知メールの送信に失敗しても申込自体は成立しているため、
+      // ここでのエラーは無視してそのまま完了画面へ進む。
+      try {
+        await fetch("/api/bookings/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId: inserted.id }),
+        });
+      } catch {
+        // ネットワークエラー等は無視する。
+      }
+
+      const params = new URLSearchParams({ creator: offering.creatorName });
+      router.push(`/booking/complete?${params.toString()}`);
+    } catch (err) {
+      setError(toUserErrorMessage(err, "BookingForm: unexpected error"));
+      setIsLoading(false);
+    }
   }
 
   return (

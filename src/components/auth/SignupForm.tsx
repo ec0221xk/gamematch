@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Input } from "@/components/ui";
+import { toUserErrorMessage } from "@/lib/utils/errorMessage";
 
 /**
  * メールアドレス + パスワードのみの会員登録フォーム。
@@ -35,50 +36,56 @@ export function SignupForm() {
 
     setIsLoading(true);
 
-    // 同意したことのDB保存は行わない(現状agreedカラムが無く、今回はスキーマ変更なしで
-    // フロント側の登録阻止のみで対応する方針。証跡を残す必要が出た場合は
-    // profilesにterms_agreed_at等のカラムを追加して保存する想定)。
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/welcome`,
-        data: { display_name: displayName },
-      },
-    });
+    try {
+      // 同意したことのDB保存は行わない(現状agreedカラムが無く、今回はスキーマ変更なしで
+      // フロント側の登録阻止のみで対応する方針。証跡を残す必要が出た場合は
+      // profilesにterms_agreed_at等のカラムを追加して保存する想定)。
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/welcome`,
+          data: { display_name: displayName },
+        },
+      });
 
-    if (signUpError) {
-      setError(signUpError.message);
+      if (signUpError) {
+        setError(toUserErrorMessage(signUpError, "SignupForm: signUp failed"));
+        setIsLoading(false);
+        return;
+      }
+
+      // SupabaseプロジェクトでEmail確認(Confirm email)がONになっている場合、
+      // ここではまだセッションが発行されない。
+      // その場合はメール内のリンク→/auth/callbackでセッション確立とprofiles作成を行う。
+      if (!data.session || !data.user) {
+        setNotice(
+          "確認メールを送信しました。メール内のリンクをクリックしたうえでログインしてください。",
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: data.user.id,
+        display_name: displayName,
+      });
+
+      if (profileError) {
+        console.error("SignupForm: profile insert failed", profileError);
+        setError(
+          "アカウントは作成されましたが、プロフィールの作成に失敗しました。時間をおいて再度お試しください。",
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      router.push("/welcome");
+      router.refresh();
+    } catch (err) {
+      setError(toUserErrorMessage(err, "SignupForm: unexpected error"));
       setIsLoading(false);
-      return;
     }
-
-    // SupabaseプロジェクトでEmail確認(Confirm email)がONになっている場合、
-    // ここではまだセッションが発行されない。
-    // その場合はメール内のリンク→/auth/callbackでセッション確立とprofiles作成を行う。
-    if (!data.session || !data.user) {
-      setNotice(
-        "確認メールを送信しました。メール内のリンクをクリックしたうえでログインしてください。",
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    const { error: profileError } = await supabase.from("profiles").insert({
-      id: data.user.id,
-      display_name: displayName,
-    });
-
-    if (profileError) {
-      setError(
-        `アカウントは作成されましたが、プロフィールの作成に失敗しました: ${profileError.message}`,
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    router.push("/welcome");
-    router.refresh();
   }
 
   return (

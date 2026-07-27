@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Badge, Button, Card } from "@/components/ui";
 import type { BookingSummary } from "@/lib/queries/bookings";
+import { toUserErrorMessage } from "@/lib/utils/errorMessage";
 
 const STATUS_LABEL: Record<BookingSummary["status"], string> = {
   pending: "申込中",
@@ -68,20 +69,25 @@ export function BookingCard({
     setError(null);
     setPendingAction(next);
 
-    const { error: updateError } = await supabase
-      .from("bookings")
-      .update({ status: next })
-      .eq("id", booking.id);
+    try {
+      const { error: updateError } = await supabase
+        .from("bookings")
+        .update({ status: next })
+        .eq("id", booking.id);
 
-    if (updateError) {
-      setError(`更新に失敗しました: ${updateError.message}`);
+      if (updateError) {
+        setError(toUserErrorMessage(updateError, "BookingCard: status update failed"));
+        setPendingAction(null);
+        return;
+      }
+
+      setStatus(next);
       setPendingAction(null);
-      return;
+      router.refresh();
+    } catch (err) {
+      setError(toUserErrorMessage(err, "BookingCard: unexpected error"));
+      setPendingAction(null);
     }
-
-    setStatus(next);
-    setPendingAction(null);
-    router.refresh();
   }
 
   return (

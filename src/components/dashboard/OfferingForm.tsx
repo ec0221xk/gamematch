@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button, Input, Select, Textarea } from "@/components/ui";
 import type { GameOption } from "@/lib/queries/games";
 import type { CategoryOption } from "@/lib/queries/categories";
+import { toUserErrorMessage } from "@/lib/utils/errorMessage";
 
 const UNIT_OPTIONS = ["1時間", "90分", "3試合", "1回"];
 
@@ -65,48 +66,53 @@ export function OfferingForm({
 
     setIsLoading(true);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      setError("ログイン状態を確認できませんでした。再度ログインしてください。");
+      if (!user) {
+        setError("ログイン状態を確認できませんでした。再度ログインしてください。");
+        setIsLoading(false);
+        return;
+      }
+
+      const payload = {
+        creator_id: user.id,
+        game_id: gameId,
+        category_id: Number(categoryId),
+        rank: rank.trim() || null,
+        price: Number(price),
+        unit,
+        description: description.trim() || null,
+      };
+
+      const { error: saveError } =
+        mode === "edit" && offeringId
+          ? await supabase.from("creator_games").update(payload).eq("id", offeringId)
+          : await supabase.from("creator_games").insert(payload);
+
+      if (saveError) {
+        setError(toUserErrorMessage(saveError, "OfferingForm: save failed"));
+        setIsLoading(false);
+        return;
+      }
+
+      if (mode === "create") {
+        setGameId("");
+        setCategoryId("");
+        setRank("");
+        setPrice("");
+        setUnit(UNIT_OPTIONS[0]);
+        setDescription("");
+      }
+
       setIsLoading(false);
-      return;
-    }
-
-    const payload = {
-      creator_id: user.id,
-      game_id: gameId,
-      category_id: Number(categoryId),
-      rank: rank.trim() || null,
-      price: Number(price),
-      unit,
-      description: description.trim() || null,
-    };
-
-    const { error: saveError } =
-      mode === "edit" && offeringId
-        ? await supabase.from("creator_games").update(payload).eq("id", offeringId)
-        : await supabase.from("creator_games").insert(payload);
-
-    if (saveError) {
-      setError(`保存に失敗しました: ${saveError.message}`);
+      router.refresh();
+    } catch (err) {
+      setError(toUserErrorMessage(err, "OfferingForm: unexpected error"));
       setIsLoading(false);
-      return;
     }
-
-    if (mode === "create") {
-      setGameId("");
-      setCategoryId("");
-      setRank("");
-      setPrice("");
-      setUnit(UNIT_OPTIONS[0]);
-      setDescription("");
-    }
-
-    setIsLoading(false);
-    router.refresh();
   }
 
   const gameOptions = games.map((game) => ({

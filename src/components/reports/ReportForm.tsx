@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button, Select, Textarea } from "@/components/ui";
 import type { SelectOption } from "@/components/ui";
 import type { ReportReason } from "@/lib/types/database";
+import { toUserErrorMessage } from "@/lib/utils/errorMessage";
 
 interface ReportFormProps {
   reportedUserId: string;
@@ -42,39 +43,44 @@ export function ReportForm({ reportedUserId }: ReportFormProps) {
     setError(null);
     setIsLoading(true);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      // middleware.tsで保護されているため通常は発生しないが、
-      // セッション切れなどに備えたフォールバック。
-      const redirectTo = `/creators/${reportedUserId}/report`;
-      router.push(`/login?${new URLSearchParams({ redirectTo }).toString()}`);
-      return;
-    }
+      if (!user) {
+        // middleware.tsで保護されているため通常は発生しないが、
+        // セッション切れなどに備えたフォールバック。
+        const redirectTo = `/creators/${reportedUserId}/report`;
+        router.push(`/login?${new URLSearchParams({ redirectTo }).toString()}`);
+        return;
+      }
 
-    if (user.id === reportedUserId) {
-      setError("自分自身を通報することはできません。");
+      if (user.id === reportedUserId) {
+        setError("自分自身を通報することはできません。");
+        setIsLoading(false);
+        return;
+      }
+
+      const { error: insertError } = await supabase.from("reports").insert({
+        reporter_id: user.id,
+        reported_user_id: reportedUserId,
+        reason,
+        detail: detail.trim() || null,
+      });
+
+      if (insertError) {
+        setError(toUserErrorMessage(insertError, "ReportForm: report insert failed"));
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(false);
-      return;
-    }
-
-    const { error: insertError } = await supabase.from("reports").insert({
-      reporter_id: user.id,
-      reported_user_id: reportedUserId,
-      reason,
-      detail: detail.trim() || null,
-    });
-
-    if (insertError) {
-      setError(`送信に失敗しました: ${insertError.message}`);
+      setIsDone(true);
+    } catch (err) {
+      setError(toUserErrorMessage(err, "ReportForm: unexpected error"));
       setIsLoading(false);
-      return;
     }
-
-    setIsLoading(false);
-    setIsDone(true);
   }
 
   if (isDone) {
