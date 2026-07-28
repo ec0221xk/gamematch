@@ -26,7 +26,12 @@
   - src/app/api/bookings/notify/route.ts（Next.js Route HandlerからResend APIを直接呼ぶ方式。Edge Function+Webhookは不採用）
   - BookingFormがinsert直後にこのAPIをawait呼び出し（通知失敗時はcatchで握りつぶし、申込自体の成立には影響しない設計）
   - .env.localに SUPABASE_SERVICE_ROLE_KEY と RESEND_API_KEY を設定し、開発環境で実受信テスト成功済み（ResendアカウントのメールアドレスとCreatorのメールを一致させて送信→受信確認）
-- 承認後の連絡導線を実装・動作確認済み：Player→Creator一方向。承認後（status=accepted）のみBookingCardにCreatorのDiscord IDと案内文、コピーボタンを表示。Discord ID未設定時は「Creatorがまだ連絡先を設定していません」の案内を表示。承認前は表示されないことも確認済み
+- 承認後の連絡導線を実装・動作確認済み。当初はPlayer→Creator一方向（承認後にBookingCardでCreatorのDiscord IDを表示）だったが、その後双方向に対応済み：
+  - getReceivedBookings（src/lib/queries/bookings.ts）のselectにdiscord_idを追加し、getSentBookingsと対称化。これによりCreator視点でも申込者（Player）のDiscord IDを取得できるように
+  - BookingCard.tsxの表示条件をisPlayerView && status === "accepted"からstatus === "accepted"のみに変更（isPlayerViewは不要になり削除）。承認前（pending/declined）は表示されない防御はそのまま維持
+  - 表示文言をotherPartyLabel（「依頼先」/「申込者」）ベースに動的化。実装の過程で、Creator視点で見ると「Creatorがまだ連絡先を設定していません」という誤った文言が出るバグが判明し、あわせて解消
+  - マイページ（ProfileForm.tsx）のDiscord ID欄に「承認後、マッチングした相手に表示されます」の案内文を追加（プライバシーポリシー第5条との整合、承認相手に表示されることの事前認識のため）
+  - Creator視点で承認済みの申込に申込者のDiscord IDが表示されること、承認前には表示されないこと、マイページの案内文表示をブラウザで動作確認済み
 - 実地テストで「探す→申込→通知→承認→連絡先表示→やり取り」の一周が実データで通ることを確認済み
 - 通報機能を実装済み（ブラウザでの動作確認はまだ未実施）：
   - supabase/migrations/0006_reports.sql 適用済み（reportsテーブル、reason enum4択、reports_not_self制約、RLS：insertは本人のみ・selectは非公開）
@@ -55,11 +60,10 @@
 1. 【重要】Vercel（本番）の環境変数にADMIN_USER_IDが未追加。Production/Previewに追加しないと本番で管理者判定が効かず、誰も/adminにアクセスできない（＝常に404）、または設定ミス時に意図しないユーザーが管理者として扱われるリスクがあるため、pushとは別に必ず対応すること
 2. 独自ドメイン取得＋Resendドメイン認証（本番で任意のCreatorのメール宛にも通知メールを届けるため。現状onboarding@resend.devのテスト送信元のため、Resendアカウント登録メール宛にしか届かない）
 3. 本番での通知メール実受信テスト（前提としてVercel側の環境変数〔Production/Preview〕に SUPABASE_SERVICE_ROLE_KEY と RESEND_API_KEY を追加する作業も未実施）
-4. （将来）双方向の連絡導線：現状はPlayer→Creator一方向（承認後にCreatorのDiscord IDのみPlayerへ表示）。Creator側からもPlayerの連絡先を見せる場合は別途検討
-5. 通報機能のブラウザ動作確認（通報フォームの表示・送信、自己通報が弾かれること、reports_not_self制約、Table Editorでの内容確認）が未実施
-6. 規約同意チェックボックスのブラウザ動作確認（未チェック時disabled・案内表示、リンクが別タブで開くこと）が未実施
-7. エラー処理の改善（まとまりA・Bとも実装済み）のブラウザ動作確認が未実施：404ページ、error.tsx（意図的にエラーを起こして確認する必要あり）、出品削除の確認ダイアログ、マイページのエラー表示、各loading.tsxの表示
-8. /adminダッシュボードについて、別アカウント（管理者以外）でログインした場合に404になることの確認が未実施（管理者以外が見られないことの検証）
+4. 通報機能のブラウザ動作確認（通報フォームの表示・送信、自己通報が弾かれること、reports_not_self制約、Table Editorでの内容確認）が未実施
+5. 規約同意チェックボックスのブラウザ動作確認（未チェック時disabled・案内表示、リンクが別タブで開くこと）が未実施
+6. エラー処理の改善（まとまりA・Bとも実装済み）のブラウザ動作確認が未実施：404ページ、error.tsx（意図的にエラーを起こして確認する必要あり）、出品削除の確認ダイアログ、マイページのエラー表示、各loading.tsxの表示
+7. /adminダッシュボードについて、別アカウント（管理者以外）でログインした場合に404になることの確認が未実施（管理者以外が見られないことの検証）
 
 ## 注意事項
 - 独自ドメイン未取得。Resendはテストモードで、アカウント登録メール宛にしか送れない。公開前にドメイン取得＋Resendドメイン認証が必須

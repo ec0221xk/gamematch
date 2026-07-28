@@ -53,8 +53,6 @@ export function BookingCard({
   >(null);
   const [copied, setCopied] = useState(false);
 
-  const isPlayerView = otherPartyLabel === "依頼先";
-
   async function handleCopyDiscordId(discordId: string) {
     try {
       await navigator.clipboard.writeText(discordId);
@@ -120,12 +118,12 @@ export function BookingCard({
 
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
 
-      {isPlayerView && status === "accepted" && (
+      {status === "accepted" && (
         <div className="mt-4 rounded-md bg-brand-50 p-3 text-sm">
           {booking.otherPartyDiscordId ? (
             <>
               <p className="text-brand-700">
-                承認されました。以下のDiscordで連絡してください。
+                承認されました。以下のDiscordで{otherPartyLabel}と連絡してください。
               </p>
               <div className="mt-2 flex items-center gap-2">
                 <span className="font-mono text-brand-900">
@@ -144,7 +142,7 @@ export function BookingCard({
             </>
           ) : (
             <p className="text-brand-700">
-              Creatorがまだ連絡先を設定していません。しばらくお待ちください。
+              {otherPartyLabel}がまだ連絡先を設定していません。しばらくお待ちください。
             </p>
           )}
         </div>

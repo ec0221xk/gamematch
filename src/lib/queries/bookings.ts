@@ -57,7 +57,9 @@ export async function getReceivedBookings(
 
   const { data, error } = await supabase
     .from("bookings")
-    .select(`${BOOKING_SELECT}, other_party:profiles!user_id(display_name)`)
+    .select(
+      `${BOOKING_SELECT}, other_party:profiles!user_id(display_name, discord_id)`,
+    )
     .eq("creator_id", creatorId)
     .order("created_at", { ascending: false })
     .returns<RawBookingRow[]>();

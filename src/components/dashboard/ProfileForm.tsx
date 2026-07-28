@@ -170,12 +170,17 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
         placeholder="得意なゲームや、対応できる時間帯などを書きましょう。"
       />
       <div className="grid gap-4 sm:grid-cols-2">
-        <Input
-          label="Discord ID"
-          value={discordId}
-          onChange={(event) => setDiscordId(event.target.value)}
-          placeholder="例: aoi#1234"
-        />
+        <div>
+          <Input
+            label="Discord ID"
+            value={discordId}
+            onChange={(event) => setDiscordId(event.target.value)}
+            placeholder="例: aoi#1234"
+          />
+          <p className="mt-1.5 text-xs text-gray-400">
+            承認後、マッチングした相手に表示されます。
+          </p>
+        </div>
         <Input
           label="国"
           value={country}
