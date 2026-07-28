@@ -9,6 +9,8 @@ import { NextResponse, type NextRequest } from "next/server";
  * - /dashboard配下(マイページ)
  * - /creators/:id/request(申込フォーム)
  * - /creators/:id/report(通報フォーム)
+ * - /admin配下(運営ダッシュボード。ログイン必須の判定のみここで行い、
+ *   ADMIN_USER_IDとの照合はsrc/app/admin/layout.tsxで行う)
  */
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next({
@@ -41,6 +43,7 @@ export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const isProtectedRoute =
     pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/admin") ||
     /^\/creators\/[^/]+\/(request|report)$/.test(pathname);
 
   if (!user && isProtectedRoute) {

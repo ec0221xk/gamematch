@@ -46,20 +46,27 @@
   - 出品削除の確認ダイアログ：DeleteOfferingButton.tsx に確認ステップを追加（「削除」クリックで即削除せず、「本当に削除しますか？」＋「削除する」/「キャンセル」の2段階に変更。誤クリックでの即削除を防止）
   - マイページのDBエラー対応：/dashboard/profile の getPageData を修正し、profilesの取得エラーを「本当に存在しない（PGRST116）」と「それ以外のDBエラー」で判別。前者のみnotFound()、後者はQueryErrorNoticeでエラー表示（本人はログイン済みなのに404が出て「アカウントが消えた」ように見える問題を解消）。同ページのoffering一覧取得エラーも同様にQueryErrorNoticeへ
   - loading.tsx：共通Spinnerコンポーネント（src/components/ui/Spinner.tsx）を新設し、/creators、/creators/[id]、/dashboard/requests、/dashboard/my-requests、/dashboard/profile にシンプルなローディング表示（スピナー＋「読み込み中...」）を追加
+- 運営向け集計ダッシュボード（/admin）を実装・動作確認済み（管理者アカウントでログインし表示・集計値の妥当性を確認済み）：
+  - アクセス制御：環境変数 ADMIN_USER_ID（NEXT_PUBLIC_なし＝サーバー専用）にログイン中のuser.idが一致する場合のみ表示。src/app/admin/layout.tsxでサーバー側チェックし、不一致・未ログインはnotFound()で404（存在自体を隠す）。middleware.tsのisProtectedRouteにも/adminを追加し、未ログイン時は/loginへリダイレクト
+  - 集計：src/lib/queries/admin.ts が src/lib/supabase/admin.ts のservice roleクライアント（RLSバイパス）で全ユーザー横断のデータを取得。マイグレーション・View・RPCは追加せず、複数のシンプルなクエリ＋JS側集計で対応
+  - 表示指標：登録ユーザー総数、Creator数（is_creator=true件数）、出品総数、申込総数（pending/accepted/declined/completed件数）、承認率（承認済み÷（承認済み＋辞退済み）、pendingは母数に含めない）、通報件数、人気のゲーム・カテゴリ（申込件数順、上位5件）、最近の申込（直近10件）
 
 ## 次回やること
-1. 独自ドメイン取得＋Resendドメイン認証（本番で任意のCreatorのメール宛にも通知メールを届けるため。現状onboarding@resend.devのテスト送信元のため、Resendアカウント登録メール宛にしか届かない）
-2. 本番での通知メール実受信テスト（前提としてVercel側の環境変数〔Production/Preview〕に SUPABASE_SERVICE_ROLE_KEY と RESEND_API_KEY を追加する作業も未実施）
-3. （将来）双方向の連絡導線：現状はPlayer→Creator一方向（承認後にCreatorのDiscord IDのみPlayerへ表示）。Creator側からもPlayerの連絡先を見せる場合は別途検討
-4. 通報機能のブラウザ動作確認（通報フォームの表示・送信、自己通報が弾かれること、reports_not_self制約、Table Editorでの内容確認）が未実施
-5. 規約同意チェックボックスのブラウザ動作確認（未チェック時disabled・案内表示、リンクが別タブで開くこと）が未実施
-6. エラー処理の改善（まとまりA・Bとも実装済み）のブラウザ動作確認が未実施：404ページ、error.tsx（意図的にエラーを起こして確認する必要あり）、出品削除の確認ダイアログ、マイページのエラー表示、各loading.tsxの表示
+1. 【重要】Vercel（本番）の環境変数にADMIN_USER_IDが未追加。Production/Previewに追加しないと本番で管理者判定が効かず、誰も/adminにアクセスできない（＝常に404）、または設定ミス時に意図しないユーザーが管理者として扱われるリスクがあるため、pushとは別に必ず対応すること
+2. 独自ドメイン取得＋Resendドメイン認証（本番で任意のCreatorのメール宛にも通知メールを届けるため。現状onboarding@resend.devのテスト送信元のため、Resendアカウント登録メール宛にしか届かない）
+3. 本番での通知メール実受信テスト（前提としてVercel側の環境変数〔Production/Preview〕に SUPABASE_SERVICE_ROLE_KEY と RESEND_API_KEY を追加する作業も未実施）
+4. （将来）双方向の連絡導線：現状はPlayer→Creator一方向（承認後にCreatorのDiscord IDのみPlayerへ表示）。Creator側からもPlayerの連絡先を見せる場合は別途検討
+5. 通報機能のブラウザ動作確認（通報フォームの表示・送信、自己通報が弾かれること、reports_not_self制約、Table Editorでの内容確認）が未実施
+6. 規約同意チェックボックスのブラウザ動作確認（未チェック時disabled・案内表示、リンクが別タブで開くこと）が未実施
+7. エラー処理の改善（まとまりA・Bとも実装済み）のブラウザ動作確認が未実施：404ページ、error.tsx（意図的にエラーを起こして確認する必要あり）、出品削除の確認ダイアログ、マイページのエラー表示、各loading.tsxの表示
+8. /adminダッシュボードについて、別アカウント（管理者以外）でログインした場合に404になることの確認が未実施（管理者以外が見られないことの検証）
 
 ## 注意事項
 - 独自ドメイン未取得。Resendはテストモードで、アカウント登録メール宛にしか送れない。公開前にドメイン取得＋Resendドメイン認証が必須
 - Supabase無料プランは7日アクセスがないとプロジェクトが自動停止する
 - スキーマ変更は「先にDBへSQL適用→その後コードpush」の順が安全
 - トップの「あおい/ゆうき/みお」等はサンプルデータで実在Creatorではない
+- 【重要】Vercel（本番）の環境変数にADMIN_USER_IDを追加する必要がある。未設定だと本番で管理者判定が効かず、誰も/adminにアクセスできない（またはコード次第では想定外の挙動になりうる）
 
 ## 教訓
 セッションをまたぐ記録（NOTES.md等）は、作成指示だけでなくコミット・pushまで完了を必ず確認すること。
