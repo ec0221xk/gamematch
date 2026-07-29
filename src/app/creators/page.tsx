@@ -12,12 +12,17 @@ interface CreatorsPageProps {
 export default async function CreatorsPage({
   searchParams,
 }: CreatorsPageProps) {
+  // トップページの推し活/コーチング入口ボタンは "category=a,b" のカンマ区切りで複数カテゴリを渡す
+  const categorySlugs = searchParams.category
+    ? searchParams.category.split(",").filter(Boolean)
+    : undefined;
+
   const [games, categories, creatorsResult] = await Promise.all([
     getActiveGames(),
     getCategories(),
     searchCreators({
       gameSlug: searchParams.game,
-      categorySlug: searchParams.category,
+      categorySlug: categorySlugs,
     }),
   ]);
 

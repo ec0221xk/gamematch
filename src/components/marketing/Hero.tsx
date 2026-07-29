@@ -1,9 +1,17 @@
 import { HeroIllustration } from "./HeroIllustration";
 import { ButtonLink } from "@/components/ui";
 
+// 実績が無くても正直に言える「強み・気軽さ」。安全性の詳細はTrustSectionが担うため、
+// ここでは「お得さ・始めやすさ」に絞り、重複しないようにする。実データの数字は使わない。
+const heroPoints = [
+  { icon: "💰", text: "手数料0円・売上は全額Creatorのもの" },
+  { icon: "⚡", text: "登録は無料・数分で完了" },
+  { icon: "📩", text: "申込みもずっと無料・気軽に問い合わせOK" },
+];
+
 export function Hero() {
   return (
-    <section className="relative overflow-hidden px-6 pt-8 pb-10 sm:pt-14 sm:pb-16">
+    <section className="relative overflow-hidden px-6 pt-10 pb-12 sm:pt-16 sm:pb-20">
       <div aria-hidden="true" className="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full"
         style={{ background: "radial-gradient(circle, rgba(139,92,246,0.12) 0%, rgba(99,102,241,0.06) 50%, transparent 70%)", filter: "blur(40px)" }} />
       <div aria-hidden="true" className="pointer-events-none absolute -left-20 bottom-0 h-[300px] w-[300px] rounded-full"
@@ -32,6 +40,17 @@ export function Hero() {
           <div className="w-full max-w-xs sm:max-w-none sm:flex-1">
             <HeroIllustration />
           </div>
+        </div>
+
+        <div className="mt-12 flex flex-col items-center gap-3 border-t border-gray-100 pt-8 text-sm text-gray-600 sm:mt-16 sm:flex-row sm:justify-center sm:gap-10 sm:pt-10">
+          {heroPoints.map((point) => (
+            <div key={point.text} className="flex items-center gap-2">
+              <span aria-hidden="true" className="text-base">
+                {point.icon}
+              </span>
+              <span>{point.text}</span>
+            </div>
+          ))}
         </div>
       </div>
     </section>

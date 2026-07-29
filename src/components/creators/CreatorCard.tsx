@@ -13,7 +13,7 @@ interface CreatorCardProps {
 export function CreatorCard({ data }: CreatorCardProps) {
   return (
     <Link href={`/creators/${data.creatorId}`} className="block h-full">
-      <Card className="flex h-full flex-col gap-3 transition-shadow hover:shadow-md">
+      <Card className="flex h-full flex-col gap-4 transition-shadow hover:shadow-md">
         <div className="flex items-center gap-3">
           <Avatar src={data.avatarUrl} alt={data.displayName} />
           <div className="min-w-0">

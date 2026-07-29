@@ -2,9 +2,9 @@ import { ButtonLink } from "@/components/ui";
 
 export function CreatorCTA() {
   return (
-    <section className="px-6 py-16 sm:py-20">
+    <section className="px-6 py-16 sm:py-24">
       <div className="mx-auto max-w-3xl">
-        <div className="relative overflow-hidden rounded-3xl px-8 py-12 text-center sm:px-16"
+        <div className="relative overflow-hidden rounded-3xl px-8 py-14 text-center sm:px-16 sm:py-16"
           style={{ background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #8B5CF6 100%)",
             boxShadow: "0 20px 60px rgba(79, 70, 229, 0.35)" }}>
           <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full"

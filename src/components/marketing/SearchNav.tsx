@@ -60,17 +60,17 @@ const options = [
  */
 export function SearchNav() {
   return (
-    <section className="px-6 py-10 sm:py-14">
+    <section className="px-6 py-12 sm:py-16">
       <div className="mx-auto max-w-5xl">
-        <p className="mb-6 text-center text-sm font-medium text-gray-400">
+        <p className="mb-7 text-center text-sm font-medium text-gray-500">
           あなたの探し方で見つける
         </p>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-3">
           {options.map((option) => (
             <Link
               key={option.title}
               href={option.href}
-              className={`group flex items-start gap-4 rounded-2xl border bg-gradient-to-br p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${option.bg} ${option.border}`}
+              className={`group flex items-start gap-4 rounded-2xl border bg-gradient-to-br p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${option.bg} ${option.border}`}
               style={{ boxShadow: "0 1px 3px rgba(99,102,241,0.07)" }}
             >
               {/* アイコン */}

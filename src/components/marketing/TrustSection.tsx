@@ -10,24 +10,25 @@ const items = [
     desc: "オンラインで合流する方法が分からなくても大丈夫。マイページに接続ガイドを用意しています。",
   },
   {
-    icon: "🆓",
-    title: "登録・申込はすべて無料",
-    desc: "会員登録・申込・Creatorへの問い合わせに料金はかかりません。料金はCreatorとの合意後に発生します。",
+    icon: "🚨",
+    title: "通報機能で運営が対応",
+    desc: "万が一トラブルがあれば通報フォームから報告できます。内容を確認し、運営が対応します。",
   },
 ];
 
 /**
  * ユーザーの不安を先回りして解消する安心宣言セクション。
  * 実績ゼロでも「運営が誠実である」ことを伝えることで信頼を構築する。
+ * お得さ・始めやすさはHeroが担うため、ここは「安全・安心の詳細」に絞る(重複解消)。
  */
 export function TrustSection() {
   return (
-    <section className="px-6 py-10 sm:py-12">
+    <section className="px-6 py-12 sm:py-16">
       <div className="mx-auto max-w-5xl">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-3">
           {items.map((item) => (
             <div key={item.title}
-              className="flex gap-4 rounded-2xl border border-indigo-50 bg-gradient-to-br from-indigo-50/60 to-white p-5"
+              className="flex gap-4 rounded-2xl border border-indigo-50 bg-gradient-to-br from-indigo-50/60 to-white p-6"
               style={{ boxShadow: "0 1px 4px rgba(99,102,241,0.06)" }}>
               <span className="text-2xl shrink-0 mt-0.5">{item.icon}</span>
               <div>

@@ -72,7 +72,8 @@ export async function getFeaturedCreators(
 
 export interface CreatorSearchFilters {
   gameSlug?: string;
-  categorySlug?: string;
+  // 複数指定時はOR絞り込み(例: トップページの推し活/コーチング入口ボタン)
+  categorySlug?: string | string[];
 }
 
 /**
@@ -95,7 +96,13 @@ export async function searchCreators(
     query = query.eq("game.slug", filters.gameSlug);
   }
   if (filters.categorySlug) {
-    query = query.eq("category.slug", filters.categorySlug);
+    const slugs = Array.isArray(filters.categorySlug)
+      ? filters.categorySlug
+      : [filters.categorySlug];
+    query =
+      slugs.length > 1
+        ? query.in("category.slug", slugs)
+        : query.eq("category.slug", slugs[0]);
   }
 
   const { data, error } = await query.returns<RawCreatorGameRow[]>();

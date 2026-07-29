@@ -67,7 +67,7 @@ export function FeaturedCreators({ creators }: FeaturedCreatorsProps) {
               注目のCreator
             </h2>
             {!isReal && (
-              <p className="mt-1 text-[10px] text-gray-300">※ サンプル</p>
+              <p className="mt-1 text-[10px] text-gray-400">※ サンプル</p>
             )}
           </div>
           <Link href="/creators" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
@@ -75,10 +75,10 @@ export function FeaturedCreators({ creators }: FeaturedCreatorsProps) {
           </Link>
         </div>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-3">
+        <div className="mt-12 grid gap-6 sm:grid-cols-3">
           {displayCreators.map((creator) => (
             <div key={creator.id} className="creator-card flex flex-col rounded-3xl border border-gray-100 bg-white"
-              style={{ padding: "32px", gap: "20px", borderRadius: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+              style={{ padding: "32px", gap: "22px", borderRadius: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
 
               {/* プロフィール */}
               <div className="flex items-center gap-4">
@@ -87,7 +87,7 @@ export function FeaturedCreators({ creators }: FeaturedCreatorsProps) {
                   <p className="truncate font-semibold text-gray-900" style={{ fontSize: "15px" }}>
                     {creator.displayName}
                   </p>
-                  <p className="truncate text-xs text-gray-400 mt-0.5">{creator.gameName}</p>
+                  <p className="truncate text-xs text-gray-500 mt-0.5">{creator.gameName}</p>
                 </div>
               </div>
 
@@ -109,28 +109,29 @@ export function FeaturedCreators({ creators }: FeaturedCreatorsProps) {
               <div className="flex flex-wrap gap-1.5">
                 {creator.tags.map((tag) => (
                   <span key={tag}
-                    className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-600">
+                    className="whitespace-nowrap rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-600">
                     ✓ {tag}
                   </span>
                 ))}
               </div>
 
               {/* 料金とCTA */}
-              <div className="flex items-center justify-between mt-auto border-t border-gray-50 pt-4">
-                <div>
+              <div className="flex items-center justify-between gap-3 mt-auto border-t border-gray-100 pt-5">
+                <div className="min-w-0">
                   <div>
                     <span className="font-bold text-gray-900" style={{ fontSize: "18px" }}>
                       ¥{creator.price.toLocaleString()}
                     </span>
-                    <span className="ml-1 text-xs text-gray-400">/ {creator.unit}</span>
+                    <span className="ml-1 text-xs text-gray-500">/ {creator.unit}</span>
                   </div>
-                  <p className="mt-0.5 text-[10px] text-gray-400">
+                  <p className="mt-1 text-[10px] leading-relaxed text-gray-400">
                     ※料金はCreatorとの合意後に確定します
                   </p>
                 </div>
                 <ButtonLink
                   href={isReal ? `/creators/${creator.creatorId}` : "/signup"}
-                  size="sm">
+                  size="md"
+                  className="shrink-0 whitespace-nowrap">
                   申し込む
                 </ButtonLink>
               </div>

@@ -19,12 +19,12 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="px-6 py-12 sm:py-16">
+    <section className="px-6 py-14 sm:py-20">
       <div className="mx-auto max-w-3xl">
         <h2 className="text-center text-base font-medium text-gray-500">
-          かんたん3ステップ
+          ゲームを一緒に始めるまでの流れ
         </h2>
-        <div className="mt-8 grid gap-8 sm:grid-cols-3 sm:gap-4">
+        <div className="mt-10 grid gap-8 sm:grid-cols-3 sm:gap-6">
           {steps.map((step) => (
             <div key={step.number} className="flex items-start gap-4 sm:flex-col sm:items-center sm:text-center">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-indigo-600"

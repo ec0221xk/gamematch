@@ -1,7 +1,7 @@
 /**
  * Heroイラスト: CreatorとUserがマッチングする瞬間を表現。
  * 左: Creatorプロフィールカード / 右: Userリクエストカード / 中央: マッチング表示
- * 下部: 信頼感を補強するミニ統計
+ * 実データではない数字(登録者数等)は表示しない。
  */
 export function HeroIllustration() {
   return (
@@ -92,21 +92,6 @@ export function HeroIllustration() {
       <rect x="306" y="178" width="148" height="40" rx="12" fill="#F9FAFB" stroke="#E5E7EB" strokeWidth="1"/>
       <text x="380" y="196" textAnchor="middle" fontSize="10" fill="#6B7280" fontFamily="sans-serif">一緒に遊んで</text>
       <text x="380" y="210" textAnchor="middle" fontSize="10" fill="#6B7280" fontFamily="sans-serif">ください！🎮</text>
-
-      {/* ===== ミニ統計(イラスト下部) ===== */}
-      <rect x="90" y="260" width="300" height="52" rx="26" fill="white" filter="url(#cardShadow)"/>
-      {/* 区切り線 */}
-      <line x1="240" y1="270" x2="240" y2="302" stroke="#E5E7EB" strokeWidth="1"/>
-      {/* 左: Creator数 */}
-      <text x="165" y="281" textAnchor="middle" fontSize="10" fill="#9CA3AF" fontFamily="sans-serif">🎮 登録Creator</text>
-      <text x="165" y="299" textAnchor="middle" fontSize="16" fontWeight="800" fill="#4F46E5" fontFamily="sans-serif">120+</text>
-      {/* 右: マッチング数 */}
-      <text x="315" y="281" textAnchor="middle" fontSize="10" fill="#9CA3AF" fontFamily="sans-serif">🤝 累計マッチング</text>
-      <text x="315" y="299" textAnchor="middle" fontSize="16" fontWeight="800" fill="#8B5CF6" fontFamily="sans-serif">1,500+</text>
-
-      {/* ===== 対応ゲーム数(右下小バッジ) ===== */}
-      <rect x="340" y="340" width="110" height="30" rx="15" fill="white" filter="url(#cardShadow)"/>
-      <text x="395" y="360" textAnchor="middle" fontSize="11" fontWeight="600" fill="#6B7280" fontFamily="sans-serif">🔥 6タイトル対応</text>
     </svg>
   );
 }
