@@ -7,16 +7,6 @@ export async function Header() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  let isCreator = false;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_creator")
-      .eq("id", user.id)
-      .single();
-    isCreator = profile?.is_creator ?? false;
-  }
-
   return (
     <header className="sticky top-0 z-10 border-b border-gray-100 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -44,16 +34,6 @@ export async function Header() {
               <Link href="/dashboard/profile"
                 className="text-sm font-medium text-gray-700 hover:text-gray-900">
                 マイページ
-              </Link>
-              {isCreator && (
-                <Link href="/dashboard/requests"
-                  className="text-sm font-medium text-gray-700 hover:text-gray-900">
-                  受け取った申込
-                </Link>
-              )}
-              <Link href="/dashboard/my-requests"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900">
-                申込状況
               </Link>
               <LogoutButton size="sm" />
             </>
