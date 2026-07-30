@@ -18,6 +18,7 @@ export interface CreatorProfile {
   avatarUrl: string | null;
   country: string | null;
   languages: string[];
+  featureTags: string[];
   completedCount: number;
   offerings: CreatorOffering[];
 }
@@ -45,7 +46,7 @@ export async function getCreatorProfile(
     supabase
       .from("profiles")
       .select(
-        "id, display_name, bio, discord_id, profile_image_url, country, languages",
+        "id, display_name, bio, discord_id, profile_image_url, country, languages, feature_tags",
       )
       .eq("id", creatorId)
       .single(),
@@ -79,6 +80,7 @@ export async function getCreatorProfile(
     avatarUrl: profile.profile_image_url,
     country: profile.country,
     languages: profile.languages,
+    featureTags: profile.feature_tags ?? [],
     completedCount: statsResult.data?.completed_count ?? 0,
     offerings: offerings.map((row) => ({
       id: row.id,

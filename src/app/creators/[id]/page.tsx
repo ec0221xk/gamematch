@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar, Badge, ButtonLink, Card } from "@/components/ui";
 import { getCreatorProfile } from "@/lib/queries/creatorProfile";
+import { getCreatorTagLabel } from "@/lib/constants/creatorTags";
 import { createClient } from "@/lib/supabase/server";
 
 interface CreatorDetailPageProps {
@@ -42,6 +43,15 @@ export default async function CreatorDetailPage({
             <p className="mt-1 text-sm text-gray-500">
               Discord: {creator.discordId}
             </p>
+          )}
+          {creator.featureTags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {creator.featureTags.map((slug) => (
+                <Badge key={slug} variant="outline">
+                  {getCreatorTagLabel(slug)}
+                </Badge>
+              ))}
+            </div>
           )}
         </div>
       </div>

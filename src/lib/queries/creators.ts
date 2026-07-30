@@ -11,6 +11,7 @@ export interface CreatorCardData {
   price: number;
   unit: string;
   categoryName: string;
+  featureTags: string[];
 }
 
 type RawCreatorGameRow = {
@@ -22,6 +23,7 @@ type RawCreatorGameRow = {
     id: string;
     display_name: string;
     profile_image_url: string | null;
+    feature_tags: string[] | null;
   } | null;
   game: { name: string; slug: string } | null;
   category: { name: string; slug: string } | null;
@@ -29,7 +31,7 @@ type RawCreatorGameRow = {
 
 // game/categoryはNOT NULLな外部キーのため、!innerを付けても本来除外される行は無い。
 // 検索条件(game.slug / category.slug)で絞り込むためにこの結合方法を使う。
-const CREATOR_GAME_SELECT = `id, rank, price, unit, creator:profiles(id, display_name, profile_image_url), game:games!inner(name, slug), category:categories!inner(name, slug)`;
+const CREATOR_GAME_SELECT = `id, rank, price, unit, creator:profiles(id, display_name, profile_image_url, feature_tags), game:games!inner(name, slug), category:categories!inner(name, slug)`;
 
 function mapRows(rows: RawCreatorGameRow[]): CreatorCardData[] {
   return rows
@@ -44,6 +46,7 @@ function mapRows(rows: RawCreatorGameRow[]): CreatorCardData[] {
       price: row.price,
       unit: row.unit,
       categoryName: row.category!.name,
+      featureTags: row.creator!.feature_tags ?? [],
     }));
 }
 

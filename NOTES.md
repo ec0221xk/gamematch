@@ -55,6 +55,13 @@
   - アクセス制御：環境変数 ADMIN_USER_ID（NEXT_PUBLIC_なし＝サーバー専用）にログイン中のuser.idが一致する場合のみ表示。src/app/admin/layout.tsxでサーバー側チェックし、不一致・未ログインはnotFound()で404（存在自体を隠す）。middleware.tsのisProtectedRouteにも/adminを追加し、未ログイン時は/loginへリダイレクト
   - 集計：src/lib/queries/admin.ts が src/lib/supabase/admin.ts のservice roleクライアント（RLSバイパス）で全ユーザー横断のデータを取得。マイグレーション・View・RPCは追加せず、複数のシンプルなクエリ＋JS側集計で対応
   - 表示指標：登録ユーザー総数、Creator数（is_creator=true件数）、出品総数、申込総数（pending/accepted/declined/completed件数）、承認率（承認済み÷（承認済み＋辞退済み）、pendingは母数に含めない）、通報件数、人気のゲーム・カテゴリ（申込件数順、上位5件）、最近の申込（直近10件）
+- Creator登録UIの簡易化として「特徴タグ」機能を実装・動作確認済み（マイページでのチェック→保存→カード/詳細表示まで一周確認済み）：
+  - supabase/migrations/0007_creator_feature_tags.sql 適用済み。profilesにfeature_tags(text[]、default '{}')を追加。値は固定6種のslug（beginner_friendly/voice_chat_ok/chat_welcome/casual/hardcore/late_night）のみ許可するcheck制約＋GINインデックス。languages列と同じ設計方針（マスタテーブルは作らず、表示名はアプリ側の定数で管理）
+  - src/lib/constants/creatorTags.ts（新規）：slug⇔表示名の対応表（CREATOR_TAGS、getCreatorTagLabel）。ProfileForm/CreatorCard/Creator詳細ページ/FeaturedCreatorsで共有
+  - ProfileForm.tsx：チップ型チェックボックスでfeature_tagsを複数選択・保存。自己紹介欄に「推し活系」「コーチング系」の例文挿入ボタンを追加（入力済みの場合は上書き前に確認バーを表示）
+  - creators.ts/creatorProfile.tsのselectにfeature_tagsを追加し、CreatorCard・Creator詳細ページ（/creators/[id]）にタグをBadge表示
+  - FeaturedCreators.tsx（TOPページ注目Creator）も実データのfeature_tagsを表示するよう変更。従来は実Creatorにも「ボイスチャット対応」を固定のダミータグとして表示していた箇所を削除し、カテゴリ・ランクバッジと合わせて表示バッジ合計が最大3個に収まるよう制御（ランクありなら特徴タグ1個まで、無しなら2個まで）
+  - 検索絞り込みへの活用（SearchFilter/searchCreatorsでのfeature_tagsフィルタ）は未実装、将来対応
 
 ## 次回やること
 1. 【重要】Vercel（本番）の環境変数にADMIN_USER_IDが未追加。Production/Previewに追加しないと本番で管理者判定が効かず、誰も/adminにアクセスできない（＝常に404）、または設定ミス時に意図しないユーザーが管理者として扱われるリスクがあるため、pushとは別に必ず対応すること
@@ -74,9 +81,7 @@
 - 「かんたん3ステップ」の命名変更：「ゲームを一緒に始めるまでの流れ」に変更
 - ①ナビゲーション整理：ヘッダーから「受け取った申込」「申込状況」を削除し「マイページ」に集約。ヘッダーは「ご利用の流れ／よくある質問／安心して利用するために／Creatorを探す／マイページ」＋ログアウトのみのスッキリした構成に変更（Header.tsxのis_creator取得も不要になり削除）。代わりに/dashboard配下（profile/requests/my-requests共通）にDashboardTabs（マイページ／受け取った申込〔Creatorのみ〕／申込状況）を新設し、マイページ経由で辿れるように。ログイン時のみ表示・トップページには非露出の方針は維持
 - ④ゲームから探す導線のカード化：小さなチップ形式（FilterTabs）を、ゲームごとに2〜3列のカードグリッド（GameCards.tsxにリネーム）に変更。カードに「ゲーム名」「Creator募集中」（実データが無いため数表示ではなくこの文言で代替）「矢印アイコン」を表示し、押すと`/creators?game=slug`へ絞り込み遷移（既存のsearchCreatorsのgame絞り込みは無改修）。ゲーム公式ロゴは使わず、TwoPillarsで使った抽象グラフィック（ゲームカラーのblob装飾）の手法を流用。白ベース・シンプルの方針は維持
-
-### 次にやる
-- ⑤Creator登録UIの簡易化：出品フォームを、チェック項目＋自己紹介テンプレートのような入力しやすい形に簡略化する（詳細は未検討、次回着手）
+- ⑤Creator登録UIの簡易化：特徴タグのチェックボックス化＋自己紹介の例文挿入ボタンを実装（詳細は上の「これまで完了したこと」参照）
 
 ### 後回し（優先度低）
 - Heroのサンプルキャラ（あおい・けんじ）のイメージ画像を魅力的に。ただし有名人・ゲーム公式キャラは使用不可、架空アバターで。装飾なので優先度低

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Avatar, Badge, Card } from "@/components/ui";
 import type { CreatorCardData } from "@/lib/queries/creators";
+import { getCreatorTagLabel } from "@/lib/constants/creatorTags";
 
 interface CreatorCardProps {
   data: CreatorCardData;
@@ -27,6 +28,13 @@ export function CreatorCard({ data }: CreatorCardProps) {
           <Badge variant="brand">{data.categoryName}</Badge>
           {data.rank && <Badge variant="outline">ランク：{data.rank}</Badge>}
         </div>
+        {data.featureTags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {data.featureTags.slice(0, 3).map((slug) => (
+              <Badge key={slug}>{getCreatorTagLabel(slug)}</Badge>
+            ))}
+          </div>
+        )}
         <p className="mt-auto text-sm font-medium text-gray-900">
           ¥{data.price.toLocaleString()}
           <span className="ml-1 text-gray-400">/ {data.unit}</span>

@@ -5,9 +5,23 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar, Button, Input, Textarea } from "@/components/ui";
 import { toUserErrorMessage } from "@/lib/utils/errorMessage";
+import { CREATOR_TAGS } from "@/lib/constants/creatorTags";
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp"];
+
+const BIO_TEMPLATES = [
+  {
+    key: "oshikatsu",
+    label: "推し活系の例文",
+    text: "ゲームが大好きで、初心者さんも大歓迎です！一緒にわいわい楽しく遊びましょう。得意なゲームは〇〇、プレイスタイルは△△な感じです。気軽に話しかけてください。",
+  },
+  {
+    key: "coaching",
+    label: "コーチング系の例文",
+    text: "〇〇(ゲーム名)を中心に、ランク〇〇帯で活動しています。初心者〜中級者の方向けに、立ち回りやエイムなど丁寧にサポートします。まずはお気軽にご相談ください！",
+  },
+];
 
 interface ProfileFormProps {
   initialValues: {
@@ -16,6 +30,7 @@ interface ProfileFormProps {
     discordId: string;
     country: string;
     languages: string[];
+    featureTags: string[];
     avatarUrl: string | null;
   };
 }
@@ -34,6 +49,12 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
   const [country, setCountry] = useState(initialValues.country);
   const [languages, setLanguages] = useState(
     initialValues.languages.join(", "),
+  );
+  const [featureTags, setFeatureTags] = useState<string[]>(
+    initialValues.featureTags,
+  );
+  const [pendingTemplateKey, setPendingTemplateKey] = useState<string | null>(
+    null,
   );
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(
@@ -64,6 +85,25 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
     setError(null);
     setAvatarFile(file);
     setAvatarPreviewUrl(URL.createObjectURL(file));
+  }
+
+  function toggleFeatureTag(slug: string) {
+    setFeatureTags((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+    );
+  }
+
+  function applyTemplate(template: (typeof BIO_TEMPLATES)[number]) {
+    setBio(template.text);
+    setPendingTemplateKey(null);
+  }
+
+  function handleTemplateClick(template: (typeof BIO_TEMPLATES)[number]) {
+    if (bio.trim().length === 0) {
+      applyTemplate(template);
+      return;
+    }
+    setPendingTemplateKey(template.key);
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -120,6 +160,7 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
           discord_id: discordId.trim() || null,
           country: country.trim() || null,
           languages: languageList,
+          feature_tags: featureTags,
           profile_image_url: avatarUrl,
         })
         .eq("id", user.id);
@@ -163,12 +204,79 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
         onChange={(event) => setDisplayName(event.target.value)}
         required
       />
-      <Textarea
-        label="自己紹介"
-        value={bio}
-        onChange={(event) => setBio(event.target.value)}
-        placeholder="得意なゲームや、対応できる時間帯などを書きましょう。"
-      />
+      <div className="flex flex-col gap-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <label className="text-sm font-medium text-gray-700">自己紹介</label>
+          <div className="flex gap-3">
+            {BIO_TEMPLATES.map((template) => (
+              <button
+                key={template.key}
+                type="button"
+                onClick={() => handleTemplateClick(template)}
+                className="text-xs font-medium text-brand-600 hover:underline"
+              >
+                {template.label}を挿入
+              </button>
+            ))}
+          </div>
+        </div>
+        {pendingTemplateKey && (
+          <div className="flex flex-wrap items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <span>入力済みの自己紹介を例文で置き換えます。よろしいですか？</span>
+            <button
+              type="button"
+              onClick={() =>
+                applyTemplate(
+                  BIO_TEMPLATES.find((t) => t.key === pendingTemplateKey)!,
+                )
+              }
+              className="font-medium underline"
+            >
+              置き換える
+            </button>
+            <button
+              type="button"
+              onClick={() => setPendingTemplateKey(null)}
+              className="text-amber-700 underline"
+            >
+              キャンセル
+            </button>
+          </div>
+        )}
+        <Textarea
+          value={bio}
+          onChange={(event) => setBio(event.target.value)}
+          placeholder="得意なゲームや、対応できる時間帯などを書きましょう。"
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-gray-700">
+          特徴タグ(複数選択可)
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {CREATOR_TAGS.map((tag) => {
+            const checked = featureTags.includes(tag.slug);
+            return (
+              <label
+                key={tag.slug}
+                className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                  checked
+                    ? "border-brand-500 bg-brand-50 text-brand-700"
+                    : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => toggleFeatureTag(tag.slug)}
+                  className="sr-only"
+                />
+                {tag.label}
+              </label>
+            );
+          })}
+        </div>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Input
