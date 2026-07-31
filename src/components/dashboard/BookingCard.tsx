@@ -31,6 +31,10 @@ function formatDateTime(iso: string) {
   });
 }
 
+function formatRequestNumber(id: string) {
+  return id.replace(/-/g, "").slice(0, 8).toUpperCase();
+}
+
 interface BookingCardProps {
   booking: BookingSummary;
   otherPartyLabel: string;
@@ -99,6 +103,10 @@ export function BookingCard({
         </div>
         <Badge variant={STATUS_VARIANT[status]}>{STATUS_LABEL[status]}</Badge>
       </div>
+
+      <p className="mt-1 text-xs text-gray-400">
+        申込番号: #{formatRequestNumber(booking.id)}
+      </p>
 
       <div className="mt-3 space-y-1 text-sm text-gray-700">
         <p>

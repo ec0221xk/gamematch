@@ -91,7 +91,7 @@ export default function HowItWorksPage() {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">現在サポートしていないこと</p>
-            {["ゲームプレイ", "", "Discordなどでの連絡"].map((item) => (
+            {["ゲームプレイ", "Discordなどでの連絡"].map((item) => (
               <p key={item} className="flex items-center gap-2 text-sm text-gray-500 py-1">
                 <span>・</span> {item}
               </p>

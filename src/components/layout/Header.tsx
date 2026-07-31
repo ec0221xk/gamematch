@@ -15,9 +15,6 @@ export async function Header() {
         </Link>
 
 <nav className="hidden items-center gap-6 text-sm text-gray-600 sm:flex">
-          <Link href="/how-it-works" className="hover:text-gray-900">
-            ご利用の流れ
-          </Link>
           <Link href="/faq" className="hover:text-gray-900">
             よくある質問
           </Link>
