@@ -66,98 +66,15 @@
   - how-it-worksページの「現在サポートしていないこと」リストに空文字列（""）の要素が混じり「・」だけの崩れた行が出ていたバグを修正（該当要素を削除）
   - ヘッダーの「ご利用の流れ」リンクを削除。フッターには既に同リンクが存在していたため実質的に集約（トップページのHowItWorksセクションはそのまま維持）
   - 申込カード（BookingCard.tsx、/dashboard/my-requests・/dashboard/requestsで共用）に、booking.id（UUID）のハイフンを除去し先頭8文字を大文字化した「申込番号: #XXXXXXXX」を表示するよう追加。連番ではないため総件数は露出しない
-
-## 作業中：支払い条件機能（設計完了・未実装）
-Creatorの支払い条件（送金時期・支払い手段）をプロフィールと出品の両方に記載できるようにする機能。CtoCのお金のトラブル（前払い/後払いの食い違い、支払い手段の不一致）防止が目的。GameMatchは決済に関与しない前提で、条件はCreator自身が任意記載する。設計のみ完了・コード/SQLとも未着手。次回はこの続きから再開する。
-
-### スキーマ設計
-- `profiles`と`creator_games`の両方に同じ形の2カラムを追加する。
-  - `payment_timing`：支払い時期（前払い/後払い/応相談）。`text`型・NULL許容・check制約で`'prepay' / 'postpay' / 'negotiable'`の3値のみ許可。`unit`（NOT NULL default）とは違い必須にしない任意項目のため、未設定はNULLで表現する。
-  - `payment_methods`：支払い手段（複数選択）。`text[]`型・NOT NULL default `'{}'`・check制約で固定候補のみ許可（`feature_tags`と同じ設計方針）。
-  - 候補一覧（slug／表示名）：`paypay`(PayPay)、`bank_transfer`(銀行振込)、`line_pay`(LINE Pay)、`wise`(Wise・海外送金)、`other`(その他/応相談)。how-it-worksページの既存の支払い例示（PayPay／銀行振込／Wise／その他）に準拠。
-- `creator_games`側は「出品ごとの上書き」。NULL（`payment_timing`）/空配列（`payment_methods`）は「上書きなし」を意味し、`profiles`側の値にフォールバックする。
-- RLSは`profiles_update_own` / `creator_games_modify_own`が既に本人のみ全カラム更新可の設計のため、追加のポリシー変更は不要（権限エラーは出ない想定）。
-
-### 「出品優先、無ければプロフィール」の優先ロジックの解決場所
-UIコンポーネントではなく**クエリ層（`src/lib/queries/*.ts`）で解決**する方針。理由：`CreatorCardData.featureTags`等、既存コードも「どのテーブルの値を最終的な表示値にするか」はクエリ層の責務にしている。新規ヘルパー`src/lib/utils/paymentTerms.ts`に純関数として集約し、`creators.ts`のmapRows・`creatorProfile.ts`のofferingsマッピング・`offerings.ts`のgetOfferingDetailの3箇所から呼ぶ。UIコンポーネントは解決済みの値をそのまま表示するだけにする。
-```ts
-function resolvePaymentTiming(profileTiming, offeringTiming) {
-  return offeringTiming ?? profileTiming ?? null;
-}
-function resolvePaymentMethods(profileMethods, offeringMethods) {
-  return offeringMethods.length > 0 ? offeringMethods : profileMethods;
-}
-```
-
-### マイグレーションSQL案（未適用。`supabase/migrations/0008_payment_terms.sql`として作成予定）
-```sql
--- =========================================================
--- GameMatch MVP - 支払い条件(payment_timing / payment_methods)
--- Supabaseダッシュボード > SQL Editor に貼り付けて実行してください
--- (0001_init.sql の後、任意のタイミングで実行可)
--- =========================================================
-
--- profiles: Creator個人の基本方針。出品側で上書きが無い場合のフォールバック値として使う。
--- 未記載でも申込自体は可能な任意項目のため、unitと違いNOT NULLにはしない。
-alter table profiles
-  add column payment_timing text,
-  add column payment_methods text[] not null default '{}';
-
-alter table profiles
-  add constraint profiles_payment_timing_check
-  check (payment_timing is null or payment_timing in ('prepay', 'postpay', 'negotiable'));
-
-alter table profiles
-  add constraint profiles_payment_methods_check
-  check (payment_methods <@ array[
-    'paypay',         -- PayPay(個人間送金)
-    'bank_transfer',  -- 銀行振込
-    'line_pay',       -- LINE Pay
-    'wise',           -- Wise(海外送金)
-    'other'           -- その他/応相談
-  ]::text[]);
-
--- creator_games: 出品ごとの上書き。列が存在すること自体は同じで、
--- NULL/空配列の場合は「上書きなし」を意味し、profilesの値にフォールバックする
--- (アプリ側で解決。DB側にビュー等は作らない)。
-alter table creator_games
-  add column payment_timing text,
-  add column payment_methods text[] not null default '{}';
-
-alter table creator_games
-  add constraint creator_games_payment_timing_check
-  check (payment_timing is null or payment_timing in ('prepay', 'postpay', 'negotiable'));
-
-alter table creator_games
-  add constraint creator_games_payment_methods_check
-  check (payment_methods <@ array[
-    'paypay', 'bank_transfer', 'line_pay', 'wise', 'other'
-  ]::text[]);
-```
-
-### 影響ファイル一覧（実装フェーズで変更予定）
-- `supabase/migrations/0008_payment_terms.sql`（新規、上記SQL）
-- `src/lib/constants/paymentTerms.ts`（新規）：支払い時期3択・支払い手段5択のslug⇔ラベル対応表（`creatorTags.ts`と同じ形）
-- `src/lib/utils/paymentTerms.ts`（新規）：優先ロジックの純関数
-- `src/components/dashboard/ProfileForm.tsx`：支払い時期（Select、未設定も選べる4択）・支払い手段（チップ型チェックボックス）を追加
-- `src/components/dashboard/OfferingForm.tsx`：同上を「上書き」として追加（「プロフィールの設定を使う（未指定）」を先頭選択肢にする）
-- `src/lib/queries/creators.ts`（一覧・TOPページ）：select文に新カラム追加＋優先ロジック適用
-- `src/lib/queries/creatorProfile.ts`（Creator詳細ページ）：同上、出品ごとに解決
-- `src/lib/queries/offerings.ts`（申込フォーム用の単一offering取得）：同上
-- `src/app/creators/[id]/page.tsx`：出品カードに解決済みの支払い時期・手段をBadge等で表示
-- `src/app/creators/[id]/request/page.tsx`：同上をCreatorカードに表示＋注意喚起文を追加
-- `src/app/booking/complete/page.tsx`：完了画面に注意喚起文を追加
-- `src/components/dashboard/BookingCard.tsx`：承認後（Discord連絡先表示ブロック付近）に注意喚起文を追加
-- 保留（要判断）：`CreatorCard.tsx`（一覧の小カード）は情報過多になるため支払いバッジは入れない方向で提案中。BookingCardに支払い条件そのものを再表示するかも未確定（注意喚起文の表示のみが必須要件）
-
-### 注意喚起の表示
-申込画面（`/creators/[id]/request`）・承認後の画面（BookingCard.tsx）に「支払い条件は当事者間で事前に合意してください。運営は金銭トラブルに関与しません。」という趣旨の注意喚起を表示する。文言は利用規約 第5条（料金および支払い）・第8条（ユーザー間のトラブル）の表現と整合させる。
-
-### 次のステップ
-1. この設計案をユーザーが確認・合意する
-2. マイグレーションSQLをSupabaseダッシュボードのSQL Editorで適用（コードpushより先）
-3. コード実装（クエリ層の優先ロジック→フォーム→表示画面の順）
-4. ブラウザで動作確認（プロフィールのみ設定/出品で上書き/両方未設定の3パターン、優先ロジックが正しいこと、注意喚起の表示）
+- Creatorの支払い条件（送金時期・支払い手段）機能を実装・Supabase適用・ブラウザ動作確認まで完了。CtoCのお金のトラブル（前払い/後払いの食い違い、支払い手段の不一致）防止が目的。GameMatchは決済に関与しない前提で、条件はCreator自身が任意記載する：
+  - `supabase/migrations/0008_payment_terms.sql`適用済み。`profiles`に`payment_timing`（text、NULL許容、'prepay'/'postpay'/'negotiable'のcheck制約）・`payment_methods`（text[]、NOT NULL default '{}'、paypay/bank_transfer/line_pay/wise/otherのcheck制約）を追加
+  - 当初は`creator_games`（出品）側にも同じ2カラムを追加し「出品優先・無ければプロフィール」の優先ロジック（クエリ層で解決）を設計したが、出品ごとに支払い条件を変える運用ニーズが無いと判断し廃止。`supabase/migrations/0009_remove_offering_payment_terms.sql`適用済みで`creator_games`側のカラムは削除。**プロフィール側の値のみを使う方式に一本化**（優先ロジックのコードは実装時点から作らず、プロフィールの値をそのまま表示する形で完結）
+  - `src/lib/constants/paymentTerms.ts`（新規）：支払い時期3択・支払い手段5択のslug⇔ラベル対応表（`creatorTags.ts`と同じ形）
+  - `src/components/dashboard/ProfileForm.tsx`：支払い時期（Select、未設定も選べる4択）・支払い手段（チップ型チェックボックス）の入力欄を追加（出品側の入力欄〔OfferingForm.tsx〕には追加していない）
+  - `src/lib/queries/creatorProfile.ts`・`src/lib/queries/offerings.ts`・`src/lib/queries/bookings.ts`：selectにprofiles.payment_timing/payment_methodsを追加し、Creator詳細・申込・申込カードの各表示にプロフィールの値をそのまま渡す
+  - `src/app/creators/[id]/page.tsx`・`src/app/creators/[id]/request/page.tsx`：支払い時期・手段をBadge表示
+  - `src/app/creators/[id]/request/page.tsx`・`src/app/booking/complete/page.tsx`・`src/components/dashboard/BookingCard.tsx`：「支払い条件は当事者間で事前に合意してください。運営は金銭トラブルに関与しません。」の注意喚起文を表示（利用規約 第5条・第8条と整合）
+  - `CreatorCard.tsx`（一覧の小カード）には情報過多を避けるため支払いバッジは入れていない
 
 ## 次回やること
 1. 【重要】Vercel（本番）の環境変数にADMIN_USER_IDが未追加。Production/Previewに追加しないと本番で管理者判定が効かず、誰も/adminにアクセスできない（＝常に404）、または設定ミス時に意図しないユーザーが管理者として扱われるリスクがあるため、pushとは別に必ず対応すること

@@ -1,97 +1,140 @@
+import { Avatar, Badge } from "@/components/ui";
+
+const creatorTags = ["VC対応", "初心者歓迎", "ランクアップ支援"];
+
 /**
- * Heroイラスト: CreatorとUserがマッチングする瞬間を表現。
- * 左: Creatorプロフィールカード / 右: Userリクエストカード / 中央: マッチング表示
- * 実データではない数字(登録者数等)は表示しない。
+ * Hero右側: Creator/Userがマッチングする様子を表したイメージ図。
+ * 星評価・登録者数などの実績数値は使わない(実データが無いため)。
+ * サンプルの名前(あおい/けんじ)は架空の例、実在の人物ではない。
  */
 export function HeroIllustration() {
   return (
+    <div>
+      <div className="flex flex-col items-center gap-3 lg:flex-row lg:items-center">
+        {/* ===== Creatorカード ===== */}
+        <div className="w-full max-w-xs rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_4px_24px_rgba(99,102,241,0.08)] lg:max-w-none lg:flex-1">
+          <Badge variant="brand">Creator</Badge>
+          <div className="mt-3 flex items-center gap-3">
+            <div className="relative shrink-0">
+              <Avatar alt="あおい" size="md" />
+              <span
+                aria-hidden="true"
+                className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-400"
+              />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-gray-900">あおい</p>
+              <p className="flex items-center gap-1 text-xs text-emerald-600">
+                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                オンライン
+              </p>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-gray-400">Apex Legends</p>
+          <div className="mt-2">
+            <Badge variant="brand">マスター</Badge>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {creatorTags.map((tag) => (
+              <Badge key={tag}>{tag}</Badge>
+            ))}
+          </div>
+          <p className="mt-3 text-sm font-bold text-gray-900">
+            ¥1,500<span className="ml-1 text-xs font-normal text-gray-400">/ 1回</span>
+          </p>
+        </div>
+
+        <Arrow />
+
+        {/* ===== 中央: マッチング成立 ===== */}
+        <div className="flex shrink-0 flex-col items-center gap-2.5 py-1">
+          <MiniCard title="申込み" desc="一緒に遊びたい！ コーチングを受けたい！" />
+          <div
+            className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-full text-center shadow-[0_8px_24px_rgba(79,70,229,0.3)]"
+            style={{ background: "linear-gradient(135deg, #4F46E5 0%, #8B5CF6 100%)" }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6"
+              aria-hidden="true"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <p className="mt-1 text-[11px] font-bold leading-tight text-white">
+              マッチング
+              <br />
+              成立！
+            </p>
+          </div>
+          <MiniCard title="Discordで日時を調整" desc="やり取りは安心・安全" />
+        </div>
+
+        <Arrow />
+
+        {/* ===== Userカード ===== */}
+        <div className="w-full max-w-xs rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_4px_24px_rgba(99,102,241,0.08)] lg:max-w-none lg:flex-1">
+          <span className="inline-flex items-center whitespace-nowrap rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">
+            User
+          </span>
+          <div className="mt-3 flex items-center gap-3">
+            <div className="relative shrink-0">
+              <Avatar alt="けんじ" size="md" />
+              <span
+                aria-hidden="true"
+                className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-400"
+              />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-gray-900">けんじ</p>
+              <p className="flex items-center gap-1 text-xs text-emerald-600">
+                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                オンライン
+              </p>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-gray-400">はじめて</p>
+          <div className="mt-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5">
+            <p className="text-xs leading-relaxed text-gray-600">
+              ダイヤを目指して頑張りたいです！優しく教えてください！
+            </p>
+          </div>
+        </div>
+      </div>
+      <p className="mt-4 text-center text-xs text-gray-400">
+        ※画面はイメージです（登場人物は架空の例です）
+      </p>
+    </div>
+  );
+}
+
+function MiniCard({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div className="w-36 shrink-0 rounded-xl border border-indigo-100 bg-indigo-50/60 px-3 py-2 text-center">
+      <p className="text-[10px] font-semibold text-indigo-700">{title}</p>
+      <p className="mt-0.5 text-[9px] leading-tight text-gray-500">{desc}</p>
+    </div>
+  );
+}
+
+function Arrow() {
+  return (
     <svg
-      viewBox="0 0 480 420"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-auto max-w-md mx-auto"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#C7D2FE"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5 shrink-0 rotate-90 lg:rotate-0"
       aria-hidden="true"
     >
-      {/* 背景の大きな円 */}
-      <circle cx="240" cy="195" r="175" fill="#EEF2FF" />
-      <circle cx="240" cy="195" r="140" fill="#F5F3FF" opacity="0.5" />
-
-      {/* 装飾ドット */}
-      <circle cx="70" cy="70" r="7" fill="#C7D2FE" />
-      <circle cx="410" cy="55" r="9" fill="#DDD6FE" />
-      <circle cx="55" cy="320" r="5" fill="#A5B4FC" opacity="0.6" />
-      <circle cx="425" cy="340" r="7" fill="#C4B5FD" />
-
-      {/* ===== Creatorカード(左) ===== */}
-      <g filter="url(#cardShadow)">
-        <rect x="12" y="80" width="178" height="148" rx="18" fill="white" />
-      </g>
-      {/* Creatorラベル */}
-      <rect x="28" y="94" width="54" height="18" rx="9" fill="#EEF2FF" />
-      <text x="55" y="107" textAnchor="middle" fontSize="10" fontWeight="600" fill="#4F46E5" fontFamily="sans-serif">Creator</text>
-      {/* アバター(グラデーション) */}
-      <defs>
-        <linearGradient id="avGrad1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#6366F1"/>
-          <stop offset="100%" stopColor="#8B5CF6"/>
-        </linearGradient>
-        <linearGradient id="avGrad2" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#8B5CF6"/>
-          <stop offset="100%" stopColor="#A78BFA"/>
-        </linearGradient>
-        <linearGradient id="btnGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#4F46E5"/>
-          <stop offset="100%" stopColor="#8B5CF6"/>
-        </linearGradient>
-        <filter id="cardShadow" x="-8%" y="-8%" width="116%" height="128%">
-          <feDropShadow dx="0" dy="4" stdDeviation="10" floodColor="#6366F1" floodOpacity="0.1"/>
-        </filter>
-        <filter id="matchShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#4F46E5" floodOpacity="0.25"/>
-        </filter>
-      </defs>
-      <circle cx="60" cy="145" r="26" fill="url(#avGrad1)" />
-      <text x="60" y="152" textAnchor="middle" fontSize="20" fontWeight="700" fill="white" fontFamily="sans-serif">あ</text>
-      {/* 名前・ゲーム */}
-      <text x="100" y="137" fontSize="14" fontWeight="700" fill="#111827" fontFamily="sans-serif">あおい</text>
-      <text x="100" y="155" fontSize="11" fill="#9CA3AF" fontFamily="sans-serif">Apex Legends</text>
-      {/* ランクバッジ */}
-      <rect x="28" y="180" width="60" height="20" rx="10" fill="#EEF2FF" />
-      <text x="58" y="194" textAnchor="middle" fontSize="11" fontWeight="600" fill="#4F46E5" fontFamily="sans-serif">マスター</text>
-      {/* 評価 */}
-      <text x="102" y="191" fontSize="12" fill="#FBBF24" fontFamily="sans-serif">★</text>
-      <text x="116" y="191" fontSize="11" fontWeight="600" fill="#374151" fontFamily="sans-serif">4.9</text>
-      {/* 料金 */}
-      <text x="28" y="217" fontSize="16" fontWeight="800" fill="#111827" fontFamily="sans-serif">¥1,500</text>
-      <text x="90" y="217" fontSize="11" fill="#9CA3AF" fontFamily="sans-serif">/ 1回</text>
-
-      {/* ===== 中央マッチングバッジ ===== */}
-      <g filter="url(#matchShadow)">
-        <rect x="175" y="160" width="130" height="50" rx="25" fill="url(#btnGrad)" />
-      </g>
-      <text x="240" y="182" textAnchor="middle" fontSize="11" fontWeight="700" fill="white" fontFamily="sans-serif">✓  マッチング</text>
-      <text x="240" y="198" textAnchor="middle" fontSize="10" fill="rgba(255,255,255,0.75)" fontFamily="sans-serif">完了しました！</text>
-
-      {/* 接続ライン */}
-      <line x1="190" y1="185" x2="175" y2="185" stroke="#C7D2FE" strokeWidth="1.5" strokeDasharray="4,3"/>
-      <line x1="305" y1="185" x2="290" y2="185" stroke="#C7D2FE" strokeWidth="1.5" strokeDasharray="4,3"/>
-
-      {/* ===== Userカード(右) ===== */}
-      <g filter="url(#cardShadow)">
-        <rect x="290" y="80" width="178" height="148" rx="18" fill="white" />
-      </g>
-      {/* Userラベル */}
-      <rect x="306" y="94" width="40" height="18" rx="9" fill="#F5F3FF" />
-      <text x="326" y="107" textAnchor="middle" fontSize="10" fontWeight="600" fill="#7C3AED" fontFamily="sans-serif">User</text>
-      {/* アバター */}
-      <circle cx="338" cy="145" r="26" fill="url(#avGrad2)" />
-      <text x="338" y="152" textAnchor="middle" fontSize="20" fontWeight="700" fill="white" fontFamily="sans-serif">け</text>
-      {/* 名前 */}
-      <text x="378" y="137" fontSize="14" fontWeight="700" fill="#111827" fontFamily="sans-serif">けんじ</text>
-      <text x="378" y="155" fontSize="11" fill="#9CA3AF" fontFamily="sans-serif">はじめて</text>
-      {/* メッセージバブル */}
-      <rect x="306" y="178" width="148" height="40" rx="12" fill="#F9FAFB" stroke="#E5E7EB" strokeWidth="1"/>
-      <text x="380" y="196" textAnchor="middle" fontSize="10" fill="#6B7280" fontFamily="sans-serif">一緒に遊んで</text>
-      <text x="380" y="210" textAnchor="middle" fontSize="10" fill="#6B7280" fontFamily="sans-serif">ください！🎮</text>
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <polyline points="14 6 20 12 14 18" />
     </svg>
   );
 }

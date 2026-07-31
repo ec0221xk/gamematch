@@ -2,6 +2,10 @@ import { notFound } from "next/navigation";
 import { BookingForm } from "@/components/bookings/BookingForm";
 import { Avatar, Badge, Card } from "@/components/ui";
 import { getOfferingDetail } from "@/lib/queries/offerings";
+import {
+  getPaymentMethodLabel,
+  getPaymentTimingLabel,
+} from "@/lib/constants/paymentTerms";
 
 interface RequestPageProps {
   params: { id: string };
@@ -87,7 +91,26 @@ export default async function RequestPage({
           ¥{offering.price.toLocaleString()}
           <span className="ml-1 font-normal text-gray-400">/ {offering.unit}</span>
         </p>
+        {(offering.paymentTiming || offering.paymentMethods.length > 0) && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            {offering.paymentTiming && (
+              <Badge variant="outline">
+                支払い：{getPaymentTimingLabel(offering.paymentTiming)}
+              </Badge>
+            )}
+            {offering.paymentMethods.map((slug) => (
+              <Badge key={slug} variant="outline">
+                {getPaymentMethodLabel(slug)}
+              </Badge>
+            ))}
+          </div>
+        )}
       </Card>
+
+      {/* 支払いに関する注意喚起(利用規約 第5条・第8条と整合) */}
+      <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
+        支払い条件は当事者間で事前に合意してください。運営は金銭トラブルに関与しません。
+      </p>
 
       <div className="mt-5">
         <BookingForm offering={offering} />

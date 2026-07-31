@@ -6,6 +6,10 @@ import { createClient } from "@/lib/supabase/client";
 import { Badge, Button, Card } from "@/components/ui";
 import type { BookingSummary } from "@/lib/queries/bookings";
 import { toUserErrorMessage } from "@/lib/utils/errorMessage";
+import {
+  getPaymentMethodLabel,
+  getPaymentTimingLabel,
+} from "@/lib/constants/paymentTerms";
 
 const STATUS_LABEL: Record<BookingSummary["status"], string> = {
   pending: "申込中",
@@ -153,6 +157,23 @@ export function BookingCard({
               {otherPartyLabel}がまだ連絡先を設定していません。しばらくお待ちください。
             </p>
           )}
+          {(booking.paymentTiming || booking.paymentMethods.length > 0) && (
+            <div className="mt-3 flex flex-wrap items-center gap-1.5">
+              {booking.paymentTiming && (
+                <Badge variant="outline">
+                  支払い：{getPaymentTimingLabel(booking.paymentTiming)}
+                </Badge>
+              )}
+              {booking.paymentMethods.map((slug) => (
+                <Badge key={slug} variant="outline">
+                  {getPaymentMethodLabel(slug)}
+                </Badge>
+              ))}
+            </div>
+          )}
+          <p className="mt-3 text-xs leading-relaxed text-brand-600">
+            支払い条件は当事者間で事前に合意してください。運営は金銭トラブルに関与しません。
+          </p>
         </div>
       )}
 

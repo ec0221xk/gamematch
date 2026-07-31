@@ -3,9 +3,13 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Avatar, Button, Input, Textarea } from "@/components/ui";
+import { Avatar, Button, Input, Select, Textarea } from "@/components/ui";
 import { toUserErrorMessage } from "@/lib/utils/errorMessage";
 import { CREATOR_TAGS } from "@/lib/constants/creatorTags";
+import {
+  PAYMENT_METHOD_OPTIONS,
+  PAYMENT_TIMING_OPTIONS,
+} from "@/lib/constants/paymentTerms";
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp"];
@@ -31,6 +35,8 @@ interface ProfileFormProps {
     country: string;
     languages: string[];
     featureTags: string[];
+    paymentTiming: string | null;
+    paymentMethods: string[];
     avatarUrl: string | null;
   };
 }
@@ -52,6 +58,12 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
   );
   const [featureTags, setFeatureTags] = useState<string[]>(
     initialValues.featureTags,
+  );
+  const [paymentTiming, setPaymentTiming] = useState(
+    initialValues.paymentTiming ?? "",
+  );
+  const [paymentMethods, setPaymentMethods] = useState<string[]>(
+    initialValues.paymentMethods,
   );
   const [pendingTemplateKey, setPendingTemplateKey] = useState<string | null>(
     null,
@@ -89,6 +101,12 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
 
   function toggleFeatureTag(slug: string) {
     setFeatureTags((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+    );
+  }
+
+  function togglePaymentMethod(slug: string) {
+    setPaymentMethods((prev) =>
       prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
     );
   }
@@ -161,6 +179,8 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
           country: country.trim() || null,
           languages: languageList,
           feature_tags: featureTags,
+          payment_timing: paymentTiming || null,
+          payment_methods: paymentMethods,
           profile_image_url: avatarUrl,
         })
         .eq("id", user.id);
@@ -272,6 +292,46 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
                   className="sr-only"
                 />
                 {tag.label}
+              </label>
+            );
+          })}
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <Select
+          label="支払い時期(任意)"
+          placeholder="未設定"
+          options={PAYMENT_TIMING_OPTIONS.map((option) => ({
+            label: option.label,
+            value: option.slug,
+          }))}
+          value={paymentTiming}
+          onChange={(event) => setPaymentTiming(event.target.value)}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-gray-700">
+          支払い手段(複数選択可)
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {PAYMENT_METHOD_OPTIONS.map((option) => {
+            const checked = paymentMethods.includes(option.slug);
+            return (
+              <label
+                key={option.slug}
+                className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                  checked
+                    ? "border-brand-500 bg-brand-50 text-brand-700"
+                    : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => togglePaymentMethod(option.slug)}
+                  className="sr-only"
+                />
+                {option.label}
               </label>
             );
           })}

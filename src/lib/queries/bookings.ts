@@ -14,6 +14,9 @@ export interface BookingSummary {
   message: string | null;
   status: BookingStatus;
   createdAt: string;
+  /** Creatorのプロフィールに設定された支払い条件(申込時点ではなく現在の設定)。 */
+  paymentTiming: string | null;
+  paymentMethods: string[];
 }
 
 type RawBookingRow = {
@@ -25,6 +28,10 @@ type RawBookingRow = {
   category: { name: string } | null;
   creator_game: { unit: string; game: { name: string } | null } | null;
   other_party: { display_name: string; discord_id?: string | null } | null;
+  creator_profile: {
+    payment_timing: string | null;
+    payment_methods: string[] | null;
+  } | null;
 };
 
 function mapBookingRow(row: RawBookingRow): BookingSummary {
@@ -40,11 +47,16 @@ function mapBookingRow(row: RawBookingRow): BookingSummary {
     message: row.message,
     status: row.status,
     createdAt: row.created_at,
+    paymentTiming: row.creator_profile?.payment_timing ?? null,
+    paymentMethods: row.creator_profile?.payment_methods ?? [],
   };
 }
 
+// creator_profileは常にCreator本人(bookings.creator_id)の設定。
+// 閲覧者がPlayer/Creatorのどちらでも同じmapBookingRowを使えるよう、
+// other_party(閲覧者から見た相手)とは別に、Creator側の支払い設定を明示的に結合する。
 const BOOKING_SELECT =
-  "id, price, message, status, created_at, category:categories(name), creator_game:creator_games(unit, game:games(name))";
+  "id, price, message, status, created_at, category:categories(name), creator_game:creator_games(unit, game:games(name)), creator_profile:profiles!creator_id(payment_timing, payment_methods)";
 
 /**
  * Creatorが受け取った申込一覧(/dashboard/requests)。

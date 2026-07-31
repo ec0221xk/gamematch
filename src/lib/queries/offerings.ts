@@ -12,6 +12,9 @@ export interface OfferingDetail {
   price: number;
   unit: string;
   description: string | null;
+  /** Creatorのプロフィールに設定された支払い条件。 */
+  paymentTiming: string | null;
+  paymentMethods: string[];
 }
 
 type RawOfferingDetailRow = {
@@ -25,6 +28,8 @@ type RawOfferingDetailRow = {
     id: string;
     display_name: string;
     profile_image_url: string | null;
+    payment_timing: string | null;
+    payment_methods: string[] | null;
   } | null;
   game: { name: string } | null;
   category: { name: string } | null;
@@ -43,7 +48,7 @@ export async function getOfferingDetail(
   const { data, error } = await supabase
     .from("creator_games")
     .select(
-      `id, rank, price, unit, description, category_id, creator:profiles(id, display_name, profile_image_url), game:games(name), category:categories(name)`,
+      `id, rank, price, unit, description, category_id, creator:profiles(id, display_name, profile_image_url, payment_timing, payment_methods), game:games(name), category:categories(name)`,
     )
     .eq("id", offeringId)
     .single()
@@ -65,5 +70,7 @@ export async function getOfferingDetail(
     price: data.price,
     unit: data.unit,
     description: data.description,
+    paymentTiming: data.creator.payment_timing,
+    paymentMethods: data.creator.payment_methods ?? [],
   };
 }

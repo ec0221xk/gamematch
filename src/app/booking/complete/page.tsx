@@ -19,6 +19,9 @@ export default function BookingCompletePage({
         <br />
         Creatorからの連絡をお待ちください。
       </p>
+      <p className="mt-6 rounded-xl bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
+        支払い条件は当事者間で事前に合意してください。運営は金銭トラブルに関与しません。
+      </p>
       <div className="mt-8 flex justify-center">
         <ButtonLink href="/creators" variant="outline" size="sm">
           Creator一覧へ戻る

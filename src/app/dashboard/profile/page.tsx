@@ -25,6 +25,8 @@ type ProfileData = {
   country: string | null;
   languages: string[];
   feature_tags: string[];
+  payment_timing: string | null;
+  payment_methods: string[];
   is_creator: boolean;
 };
 
@@ -49,7 +51,7 @@ async function getPageData(userId: string): Promise<PageDataResult> {
     supabase
       .from("profiles")
       .select(
-        "display_name, bio, discord_id, profile_image_url, country, languages, feature_tags, is_creator",
+        "display_name, bio, discord_id, profile_image_url, country, languages, feature_tags, payment_timing, payment_methods, is_creator",
       )
       .eq("id", userId)
       .single(),
@@ -148,6 +150,8 @@ export default async function ProfileDashboardPage() {
               country: profile.country ?? "",
               languages: profile.languages ?? [],
               featureTags: profile.feature_tags ?? [],
+              paymentTiming: profile.payment_timing,
+              paymentMethods: profile.payment_methods ?? [],
               avatarUrl: profile.profile_image_url,
             }}
           />

@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import { Avatar, Badge, ButtonLink, Card } from "@/components/ui";
 import { getCreatorProfile } from "@/lib/queries/creatorProfile";
 import { getCreatorTagLabel } from "@/lib/constants/creatorTags";
+import {
+  getPaymentMethodLabel,
+  getPaymentTimingLabel,
+} from "@/lib/constants/paymentTerms";
 import { createClient } from "@/lib/supabase/server";
 
 interface CreatorDetailPageProps {
@@ -49,6 +53,20 @@ export default async function CreatorDetailPage({
               {creator.featureTags.map((slug) => (
                 <Badge key={slug} variant="outline">
                   {getCreatorTagLabel(slug)}
+                </Badge>
+              ))}
+            </div>
+          )}
+          {(creator.paymentTiming || creator.paymentMethods.length > 0) && (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {creator.paymentTiming && (
+                <Badge variant="outline">
+                  支払い：{getPaymentTimingLabel(creator.paymentTiming)}
+                </Badge>
+              )}
+              {creator.paymentMethods.map((slug) => (
+                <Badge key={slug} variant="outline">
+                  {getPaymentMethodLabel(slug)}
                 </Badge>
               ))}
             </div>
