@@ -62,6 +62,10 @@
   - creators.ts/creatorProfile.tsのselectにfeature_tagsを追加し、CreatorCard・Creator詳細ページ（/creators/[id]）にタグをBadge表示
   - FeaturedCreators.tsx（TOPページ注目Creator）も実データのfeature_tagsを表示するよう変更。従来は実Creatorにも「ボイスチャット対応」を固定のダミータグとして表示していた箇所を削除し、カテゴリ・ランクバッジと合わせて表示バッジ合計が最大3個に収まるよう制御（ランクありなら特徴タグ1個まで、無しなら2個まで）
   - 検索絞り込みへの活用（SearchFilter/searchCreatorsでのfeature_tagsフィルタ）は未実装、将来対応
+- 3件の改善を実装・ビルド確認・push済み：
+  - how-it-worksページの「現在サポートしていないこと」リストに空文字列（""）の要素が混じり「・」だけの崩れた行が出ていたバグを修正（該当要素を削除）
+  - ヘッダーの「ご利用の流れ」リンクを削除。フッターには既に同リンクが存在していたため実質的に集約（トップページのHowItWorksセクションはそのまま維持）
+  - 申込カード（BookingCard.tsx、/dashboard/my-requests・/dashboard/requestsで共用）に、booking.id（UUID）のハイフンを除去し先頭8文字を大文字化した「申込番号: #XXXXXXXX」を表示するよう追加。連番ではないため総件数は露出しない
 
 ## 次回やること
 1. 【重要】Vercel（本番）の環境変数にADMIN_USER_IDが未追加。Production/Previewに追加しないと本番で管理者判定が効かず、誰も/adminにアクセスできない（＝常に404）、または設定ミス時に意図しないユーザーが管理者として扱われるリスクがあるため、pushとは別に必ず対応すること
