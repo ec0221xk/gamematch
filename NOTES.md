@@ -96,6 +96,10 @@
   - 実装前に、`payment_account_info`をselectしている全箇所を洗い出し、公開系クエリ（Creator一覧・検索の`creators.ts`、Creator詳細の`creatorProfile.ts`、運営ダッシュボードの`admin.ts`）に含まれていないことを確認済み
   - 暗号化は行わない方針（discord_id等の既存の個人情報系カラムと同水準。Supabase/Postgresの保存時暗号化に委ねる）
 - `/contact`ページにメールでの問い合わせ導線を追加：既存のX DM案内カードの下に、同じカードスタイル（白背景・角丸・薄い影）で`ec0221xk@gmail.com`宛の`mailto:`リンクを追加。ボタンはXの紫グラデーションCTAとは差をつけアウトライン(枠線)にし、「選択肢の一つ」として強調しすぎない見せ方にした
+- HeroIllustration調整2件＋`/faq`ページ新規作成：
+  - 【発見した既存バグ】Header・Footer・`/contact`・`/how-it-works`から`/faq`へのリンクが既に置かれていたが、`src/app/faq/page.tsx`自体が存在せず404になっていた。Q&A6件（申込みの流れ／キャンセル方法／承認までの期間／支払いトラブル時の対応／Discordを使わない場合／利用手数料）を`<details>`によるアコーディオン形式で新規作成し解消。内容は実際のアプリ仕様（Player側にキャンセル機能が無いこと、決済に非関与であること等）に合わせた
+  - `HeroIllustration.tsx`のPC版（lg以上）で表示していた、マッチング成立の円の左右の横向き矢印（Arrowコンポーネント）を削除（未使用になったArrow関数自体も削除）
+  - `HeroIllustration.tsx`のUserカードのサンプル名を「けんじ」→「ひらく」に変更
 
 ## 次回やること
 1. 【重要】Vercel（本番）の環境変数にADMIN_USER_IDが未追加。Production/Previewに追加しないと本番で管理者判定が効かず、誰も/adminにアクセスできない（＝常に404）、または設定ミス時に意図しないユーザーが管理者として扱われるリスクがあるため、pushとは別に必ず対応すること

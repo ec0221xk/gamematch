@@ -10,13 +10,13 @@ const COMPACT_BADGE_CLASS = "!px-2 !py-0.5 !text-[10px] lg:!px-2.5 lg:!py-1 lg:!
 
 /**
  * Hero右側: Creator/Userがマッチングする様子を表したイメージ図。
- * サンプルの名前(あおい/けんじ)・評価・料金は全て架空の例、実在の人物・実績ではない
+ * サンプルの名前(あおい/ひらく)・評価・料金は全て架空の例、実在の人物・実績ではない
  * (実際のCreatorCard等では星評価は表示しない。ここは説明用イメージのみの特例)。
  *
  * モバイル(lg未満)ではCreatorカードとUserカードを横並び2カラムにし、
  * その下に「マッチング成立」の一連の流れを配置する(縦一直線だと
  * 「Creatorが申し込んでいる」ように見えてしまうため、両者が対等に
- * 歩み寄る構図にする)。lg以上は従来どおり横一列(Creator→矢印→中央→矢印→User)。
+ * 歩み寄る構図にする)。lg以上は横一列(Creator→中央→User)。
  */
 export function HeroIllustration() {
   return (
@@ -81,10 +81,6 @@ export function HeroIllustration() {
           </p>
         </div>
 
-        <div className="hidden lg:flex lg:items-center">
-          <Arrow />
-        </div>
-
         {/* ===== 中央: マッチング成立(モバイルは2カードの下、lgは間に配置) ===== */}
         <div style={{ gridArea: "center" }} className="flex flex-col items-center gap-2 py-1 lg:shrink-0 lg:gap-3">
           <SpeechBubble title="申込み" desc="一緒に遊びたい！ コーチングを受けたい！" tailPosition="bottom" />
@@ -113,10 +109,6 @@ export function HeroIllustration() {
           <SpeechBubble title="Discordで日時を調整" desc="やり取りは安心・安全" tailPosition="top" />
         </div>
 
-        <div className="hidden lg:flex lg:items-center">
-          <Arrow />
-        </div>
-
         {/* ===== Userカード ===== */}
         <div
           style={{ gridArea: "user" }}
@@ -127,14 +119,14 @@ export function HeroIllustration() {
           </span>
           <div className="mt-2 flex items-center gap-2 lg:mt-3 lg:gap-3">
             <div className="relative shrink-0">
-              <Avatar src="/images/hero/user-avatar.png" alt="けんじ" size="md" className={COMPACT_AVATAR_CLASS} />
+              <Avatar src="/images/hero/user-avatar.png" alt="ひらく" size="md" className={COMPACT_AVATAR_CLASS} />
               <span
                 aria-hidden="true"
                 className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400 lg:h-3 lg:w-3"
               />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-gray-900 lg:text-sm">けんじ</p>
+              <p className="truncate text-xs font-semibold text-gray-900 lg:text-sm">ひらく</p>
               <p className="flex items-center gap-1 text-[10px] text-emerald-600 lg:text-xs">
                 <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 オンライン
@@ -216,23 +208,5 @@ function IllustrationBackgroundDecoration() {
         <path d="M12 2.5l1.6 3.6 3.9.4-3 2.6.9 3.9L12 11l-3.4 2 .9-3.9-3-2.6 3.9-.4z" />
       </svg>
     </div>
-  );
-}
-
-function Arrow() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#C7D2FE"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-5 w-5 shrink-0 lg:rotate-0"
-      aria-hidden="true"
-    >
-      <line x1="4" y1="12" x2="20" y2="12" />
-      <polyline points="14 6 20 12 14 18" />
-    </svg>
   );
 }
