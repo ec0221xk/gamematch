@@ -30,6 +30,19 @@ export default function ContactPage() {
         </a>
       </div>
 
+      <div className="mt-4 rounded-2xl border border-gray-100 bg-white p-6 text-center"
+        style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+        <p className="text-4xl mb-4">✉️</p>
+        <p className="font-semibold text-gray-900">ec0221xk@gmail.com</p>
+        <p className="mt-1 text-sm text-gray-500">メールでのお問い合わせも受け付けています</p>
+        <a
+          href="mailto:ec0221xk@gmail.com"
+          className="mt-5 inline-flex items-center justify-center rounded-xl border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+        >
+          メールを送る
+        </a>
+      </div>
+
       <div className="mt-8 rounded-2xl border border-gray-100 bg-gray-50 p-5">
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
           お問い合わせ前に確認
