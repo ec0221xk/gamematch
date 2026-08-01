@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Avatar, Badge, ButtonLink } from "@/components/ui";
 import type { CreatorCardData } from "@/lib/queries/creators";
 import { getCreatorTagLabel } from "@/lib/constants/creatorTags";
@@ -81,19 +80,14 @@ export function FeaturedCreators({ creators }: FeaturedCreatorsProps) {
   return (
     <section className="px-6 py-16 sm:py-24">
       <div className="mx-auto max-w-5xl">
-        <div className="flex items-end justify-between">
-          <div>
-            <h2 className="font-semibold text-gray-900"
-              style={{ fontSize: "clamp(1.35rem, 2.5vw, 1.75rem)", letterSpacing: "-0.02em" }}>
-              注目のCreator
-            </h2>
-            {!isReal && (
-              <p className="mt-1 text-[10px] text-gray-400">※ サンプル</p>
-            )}
-          </div>
-          <Link href="/creators" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
-            すべて見る →
-          </Link>
+        <div>
+          <h2 className="font-semibold text-gray-900"
+            style={{ fontSize: "clamp(1.35rem, 2.5vw, 1.75rem)", letterSpacing: "-0.02em" }}>
+            注目のCreator
+          </h2>
+          {!isReal && (
+            <p className="mt-1 text-[10px] text-gray-400">※ サンプル</p>
+          )}
         </div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-3">

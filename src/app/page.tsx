@@ -1,5 +1,4 @@
 import { Hero } from "@/components/marketing/Hero";
-import { TwoPillars } from "@/components/marketing/TwoPillars";
 import { GameCards } from "@/components/marketing/GameCards";
 import { FeaturedCreators } from "@/components/marketing/FeaturedCreators";
 import { SearchNav } from "@/components/marketing/SearchNav";
@@ -10,8 +9,7 @@ import { getFeaturedCreators } from "@/lib/queries/creators";
 
 /**
  * 最終セクション順:
- * Hero(CTA1つ・シンプル)
- * → TwoPillars(推し活/コーチングの2本柱訴求)
+ * Hero(CTA・下部にカテゴリ帯を内包)
  * → GameCards(ゲーム別カードグリッド → /creatorsへ遷移)
  * → FeaturedCreators(注目Creator)
  * → SearchNav(3導線カード)
@@ -20,6 +18,7 @@ import { getFeaturedCreators } from "@/lib/queries/creators";
  * → CreatorCTA(Creator募集・フッター直前)
  *
  * 削除: PopularGames(GameCardsで代替) / CategoryGrid(SearchNavで代替)
+ * / TwoPillars(役割をHero下部のカテゴリ帯に統合したため廃止)
  */
 export default async function Home() {
   const creatorsResult = await getFeaturedCreators(3);
@@ -27,7 +26,6 @@ export default async function Home() {
   return (
     <main>
       <Hero />
-      <TwoPillars />
       <GameCards />
       {creatorsResult.ok && <FeaturedCreators creators={creatorsResult.data} />}
       <SearchNav />

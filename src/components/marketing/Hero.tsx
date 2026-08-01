@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { HeroIllustration } from "./HeroIllustration";
 import { ButtonLink } from "@/components/ui";
 
@@ -9,10 +10,15 @@ const heroPoints = [
   { icon: "⚡", text: "登録は無料／数分で完了" },
 ];
 
+// slugはcategoriesテーブル(0001_init.sql)のものと一致させる。
+// 表示順は「一緒に遊ぶ／コーチング／VTuber交流／ランクアップ支援」。
 const categories = [
   {
     title: "一緒に遊ぶ",
     desc: "気の合うCreatorと一緒にプレイ",
+    slug: "play_together",
+    gradient: "from-indigo-50 to-blue-50",
+    accent: "#4F46E5",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
         <rect x="2" y="7" width="20" height="13" rx="4" />
@@ -27,6 +33,9 @@ const categories = [
   {
     title: "コーチング",
     desc: "上級者から学んで上達",
+    slug: "coaching",
+    gradient: "from-violet-50 to-purple-50",
+    accent: "#7C3AED",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
         <path d="M12 20h9" />
@@ -35,22 +44,28 @@ const categories = [
     ),
   },
   {
-    title: "ランクアップ支援",
-    desc: "目標ランク達成をサポート",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
-        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-        <polyline points="17 6 23 6 23 12" />
-      </svg>
-    ),
-  },
-  {
     title: "VTuber交流",
     desc: "お気に入りのVTuberと特別な時間を",
+    slug: "vtuber",
+    gradient: "from-fuchsia-50 to-pink-50",
+    accent: "#C026D3",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
         <polygon points="23 7 16 12 23 17 23 7" />
         <rect x="1" y="5" width="15" height="14" rx="2" />
+      </svg>
+    ),
+  },
+  {
+    title: "ランクアップ支援",
+    desc: "目標ランク達成をサポート",
+    slug: "rank_up",
+    gradient: "from-sky-50 to-blue-50",
+    accent: "#2563EB",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+        <polyline points="17 6 23 6 23 12" />
       </svg>
     ),
   },
@@ -122,9 +137,11 @@ export function Hero() {
               安心して遊べる。
             </h1>
             <p className="mt-5 text-gray-500 lg:mx-0" style={{ fontSize: "1.1rem", lineHeight: 1.75 }}>
-              一緒に遊ぶ、コーチングを受ける。
-              <br className="hidden sm:block" />
-              あなたにぴったりのCreatorが見つかる、ゲーム特化のマッチングサービス。
+              一緒に遊ぶ、コーチングを受ける、推しと交流する。
+              <br />
+              ゲーム特化のマッチングサービスで、
+              <br />
+              あなたにぴったりのCreatorがきっと見つかる。
             </p>
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:items-start lg:justify-start">
               <ButtonLink href="/creators" size="lg" className="w-full whitespace-nowrap sm:w-auto">
@@ -151,15 +168,45 @@ export function Hero() {
         </div>
 
         <div className="mt-16 border-t border-gray-100 pt-10 sm:mt-20">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-4 sm:gap-x-6">
+          <p className="mb-5 text-xs font-medium uppercase tracking-widest text-gray-400">
+            カテゴリから探す
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {categories.map((category) => (
-              <div key={category.title} className="flex flex-col items-center text-center sm:items-start sm:text-left">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50">
+              <Link
+                key={category.slug}
+                href={`/creators?category=${category.slug}`}
+                className={`group relative flex min-h-[104px] flex-col overflow-hidden rounded-2xl border border-white bg-gradient-to-br p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg sm:p-5 ${category.gradient}`}
+                style={{
+                  boxShadow: "0 1px 3px rgba(15,23,42,0.06), 0 0 0 1px rgba(15,23,42,0.04)",
+                }}
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 100 100"
+                  className="pointer-events-none absolute -right-5 -top-6 h-24 w-24"
+                >
+                  <circle cx="50" cy="50" r="42" fill={category.accent} opacity="0.16" />
+                  <circle cx="68" cy="28" r="10" fill={category.accent} opacity="0.3" />
+                </svg>
+                <div className="relative z-10 flex h-11 w-11 items-center justify-center rounded-xl bg-white/70">
                   {category.icon}
                 </div>
-                <p className="mt-3 text-sm font-semibold text-gray-900">{category.title}</p>
-                <p className="mt-1 text-xs leading-relaxed text-gray-500">{category.desc}</p>
-              </div>
+                <p className="relative z-10 mt-3 text-sm font-semibold text-gray-900">{category.title}</p>
+                <p className="relative z-10 mt-1 text-xs leading-relaxed text-gray-500">{category.desc}</p>
+                <svg
+                  aria-hidden="true"
+                  className="relative z-10 mt-auto h-4 w-4 pt-2 text-gray-400 transition-transform duration-200 group-hover:translate-x-1"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </Link>
             ))}
           </div>
         </div>

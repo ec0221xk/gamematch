@@ -75,6 +75,13 @@
   - `src/app/creators/[id]/page.tsx`・`src/app/creators/[id]/request/page.tsx`：支払い時期・手段をBadge表示
   - `src/app/creators/[id]/request/page.tsx`・`src/app/booking/complete/page.tsx`・`src/components/dashboard/BookingCard.tsx`：「支払い条件は当事者間で事前に合意してください。運営は金銭トラブルに関与しません。」の注意喚起文を表示（利用規約 第5条・第8条と整合）
   - `CreatorCard.tsx`（一覧の小カード）には情報過多を避けるため支払いバッジは入れていない
+- Heroセクションを大幅リニューアル・ブラウザ動作確認まで完了：
+  - サブコピーを3行構成に変更（見出し・CTA2つ・強み3点は変更なし）
+  - `HeroIllustration.tsx`：Creator/Userのアバターを`Avatar`の`src`指定で`public/images/hero/creator-avatar.png`・`user-avatar.png`（用意してもらったイラスト画像）に差し替え、サイズを`md`→`lg`に拡大。星評価バッジ（架空値・イメージ用の特例として追加）、中央の「申込み」「Discordで日時を調整」を吹き出し型（尻尾付き）に変更、Userカードのメッセージも吹き出し型に変更、薄紫のコントローラー等のアイコン背景装飾を追加。右下の「※画面はイメージです」の注記は不要と判断し削除
+  - Hero下部の静的な4カテゴリ表示を、`GameCards.tsx`と同じビジュアル言語（カード型・ホバーで浮く・blob装飾）でリンク化。`categories`テーブルのslugを使い`/creators?category=slug`へ遷移（既存のCategorySearchFiltersの絞り込みにそのまま対応）。表示順を「一緒に遊ぶ／コーチング／VTuber交流／ランクアップ支援」に変更。カード上部に「カテゴリから探す」ラベル（GameCardsと同スタイル）を追加し、カード最小高さもGameCardsと統一（`min-h-[104px]`）
+  - 役割が重複していた`TwoPillars.tsx`（推し活/コーチングの2本柱訴求）を削除し、`src/app/page.tsx`からも除去。役割はHero下部のカテゴリ帯に統合
+  - `FeaturedCreators.tsx`の「すべて見る →」リンクを削除（重複導線の整理）
+  - 「トップページ デザイン改善TODO」の「後回し」に記載していた「Heroのサンプルキャラのイメージ画像を魅力的に」は今回のアバター差し替えで対応完了
 
 ## 次回やること
 1. 【重要】Vercel（本番）の環境変数にADMIN_USER_IDが未追加。Production/Previewに追加しないと本番で管理者判定が効かず、誰も/adminにアクセスできない（＝常に404）、または設定ミス時に意図しないユーザーが管理者として扱われるリスクがあるため、pushとは別に必ず対応すること
@@ -95,9 +102,9 @@
 - ①ナビゲーション整理：ヘッダーから「受け取った申込」「申込状況」を削除し「マイページ」に集約。ヘッダーは「ご利用の流れ／よくある質問／安心して利用するために／Creatorを探す／マイページ」＋ログアウトのみのスッキリした構成に変更（Header.tsxのis_creator取得も不要になり削除）。代わりに/dashboard配下（profile/requests/my-requests共通）にDashboardTabs（マイページ／受け取った申込〔Creatorのみ〕／申込状況）を新設し、マイページ経由で辿れるように。ログイン時のみ表示・トップページには非露出の方針は維持
 - ④ゲームから探す導線のカード化：小さなチップ形式（FilterTabs）を、ゲームごとに2〜3列のカードグリッド（GameCards.tsxにリネーム）に変更。カードに「ゲーム名」「Creator募集中」（実データが無いため数表示ではなくこの文言で代替）「矢印アイコン」を表示し、押すと`/creators?game=slug`へ絞り込み遷移（既存のsearchCreatorsのgame絞り込みは無改修）。ゲーム公式ロゴは使わず、TwoPillarsで使った抽象グラフィック（ゲームカラーのblob装飾）の手法を流用。白ベース・シンプルの方針は維持
 - ⑤Creator登録UIの簡易化：マイページに特徴タグ（初心者歓迎／VCあり／雑談歓迎／エンジョイ勢／ガチ勢／深夜対応の6種）のチェックボックスを追加し、profiles.feature_tagsに保存（詳細な設計は上の「これまで完了したこと」参照）。CreatorCard・Creator詳細ページ・TOPページのFeaturedCreatorsにタグをBadge表示。自己紹介欄には「推し活系」「コーチング系」の例文を挿入するボタンを追加し、入力済みの場合は上書き前に確認を挟むようにした。実装過程で、FeaturedCreatorsが実Creatorにも一律「ボイスチャット対応」という固定タグを表示していた（実際の設定と無関係な表示だった）ことが判明し、実データのfeature_tagsに置き換えて解消済み
+- ⑥Heroセクションの大幅リニューアル：サブコピー3行化、HeroIllustrationのアバターを架空イラスト画像に差し替え・拡大、下部の静的4カテゴリ表示をGameCards同様のカード型リンクに変更（表示順「一緒に遊ぶ／コーチング／VTuber交流／ランクアップ支援」）。役割が重複していたTwoPillars.tsxを削除し役割をこのカテゴリ帯に統合。FeaturedCreatorsの「すべて見る →」リンクも削除（詳細は上の「これまで完了したこと」参照）
 
 ### 後回し（優先度低）
-- Heroのサンプルキャラ（あおい・けんじ）のイメージ画像を魅力的に。ただし有名人・ゲーム公式キャラは使用不可、架空アバターで。装飾なので優先度低
 - 運営者自身のプロフィール写真を設定（実Creatorカードの見栄え向上）
 
 ### 将来（実績が溜まってから）
