@@ -43,11 +43,6 @@ export default async function CreatorDetailPage({
               <span>{creator.languages.join(" / ")}</span>
             )}
           </div>
-          {creator.discordId && (
-            <p className="mt-1 text-sm text-gray-500">
-              Discord: {creator.discordId}
-            </p>
-          )}
           {creator.featureTags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
               {creator.featureTags.map((slug) => (

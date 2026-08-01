@@ -60,12 +60,23 @@ export function BookingCard({
     "accepted" | "declined" | null
   >(null);
   const [copied, setCopied] = useState(false);
+  const [paymentInfoCopied, setPaymentInfoCopied] = useState(false);
 
   async function handleCopyDiscordId(discordId: string) {
     try {
       await navigator.clipboard.writeText(discordId);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // クリップボードAPIが使えない環境では何もしない
+    }
+  }
+
+  async function handleCopyPaymentAccountInfo(paymentAccountInfo: string) {
+    try {
+      await navigator.clipboard.writeText(paymentAccountInfo);
+      setPaymentInfoCopied(true);
+      setTimeout(() => setPaymentInfoCopied(false), 2000);
     } catch {
       // クリップボードAPIが使えない環境では何もしない
     }
@@ -169,6 +180,26 @@ export function BookingCard({
                   {getPaymentMethodLabel(slug)}
                 </Badge>
               ))}
+            </div>
+          )}
+          {booking.paymentAccountInfo && (
+            <div className="mt-3">
+              <p className="text-xs font-medium text-brand-700">振込先</p>
+              <div className="mt-1 flex items-start gap-2">
+                <span className="whitespace-pre-wrap font-mono text-sm text-brand-900">
+                  {booking.paymentAccountInfo}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0"
+                  onClick={() =>
+                    handleCopyPaymentAccountInfo(booking.paymentAccountInfo!)
+                  }
+                >
+                  {paymentInfoCopied ? "コピーしました" : "コピー"}
+                </Button>
+              </div>
             </div>
           )}
           <p className="mt-3 text-xs leading-relaxed text-brand-600">

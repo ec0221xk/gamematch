@@ -32,6 +32,7 @@ type ProfileData = {
 
 type PageData = {
   profile: ProfileData;
+  paymentAccountInfo: string | null;
   offerings: RawOwnedOfferingRow[];
   games: Awaited<ReturnType<typeof getActiveGames>>;
   categories: Awaited<ReturnType<typeof getCategories>>;
@@ -47,25 +48,32 @@ type PageDataResult =
 async function getPageData(userId: string): Promise<PageDataResult> {
   const supabase = createClient();
 
-  const [profileResult, offeringsResult, games, categories] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select(
-        "display_name, bio, discord_id, profile_image_url, country, languages, feature_tags, payment_timing, payment_methods, is_creator",
-      )
-      .eq("id", userId)
-      .single(),
-    supabase
-      .from("creator_games")
-      .select(
-        "id, rank, price, unit, description, game:games(id, name), category:categories(id, name)",
-      )
-      .eq("creator_id", userId)
-      .order("created_at", { ascending: false })
-      .returns<RawOwnedOfferingRow[]>(),
-    getActiveGames(),
-    getCategories(),
-  ]);
+  const [profileResult, offeringsResult, payoutResult, games, categories] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select(
+          "display_name, bio, discord_id, profile_image_url, country, languages, feature_tags, payment_timing, payment_methods, is_creator",
+        )
+        .eq("id", userId)
+        .single(),
+      supabase
+        .from("creator_games")
+        .select(
+          "id, rank, price, unit, description, game:games(id, name), category:categories(id, name)",
+        )
+        .eq("creator_id", userId)
+        .order("created_at", { ascending: false })
+        .returns<RawOwnedOfferingRow[]>(),
+      // profilesとは別テーブル。行がまだ無い(一度も保存していない)場合もあるためmaybeSingle。
+      supabase
+        .from("creator_payment_account_info")
+        .select("payment_account_info")
+        .eq("creator_id", userId)
+        .maybeSingle(),
+      getActiveGames(),
+      getCategories(),
+    ]);
 
   if (profileResult.error) {
     // PGRST116: .single()で対象行が0件だったことを示すPostgRESTのエラーコード。
@@ -89,10 +97,20 @@ async function getPageData(userId: string): Promise<PageDataResult> {
     return { status: "error" };
   }
 
+  // 振込先情報の取得に失敗しても、マイページ全体は表示できるようにする
+  // (未保存で行自体が存在しない場合もこちらを通る。空欄扱いにするだけで十分)。
+  if (payoutResult.error) {
+    console.error(
+      "ProfileDashboardPage: payout info fetch failed",
+      payoutResult.error,
+    );
+  }
+
   return {
     status: "ok",
     data: {
       profile: profileResult.data as ProfileData,
+      paymentAccountInfo: payoutResult.data?.payment_account_info ?? null,
       offerings: offeringsResult.data ?? [],
       games,
       categories,
@@ -128,7 +146,8 @@ export default async function ProfileDashboardPage() {
     );
   }
 
-  const { profile, offerings, games, categories } = pageDataResult.data;
+  const { profile, paymentAccountInfo, offerings, games, categories } =
+    pageDataResult.data;
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
@@ -152,6 +171,7 @@ export default async function ProfileDashboardPage() {
               featureTags: profile.feature_tags ?? [],
               paymentTiming: profile.payment_timing,
               paymentMethods: profile.payment_methods ?? [],
+              paymentAccountInfo: paymentAccountInfo ?? "",
               avatarUrl: profile.profile_image_url,
             }}
           />

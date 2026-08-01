@@ -86,6 +86,15 @@
   - `HeroIllustration.tsx`のモバイル表示（`lg`未満）を、Creator/Userカードが縦一直線に並ぶ構成（Creator→矢印→マッチング成立円→矢印→User）から、両者が対等に歩み寄る構図に変更。CSS Grid（`grid-template-areas`で`"creator user" / "center center"`）でCreatorカードとUserカードを横並び2カラムにし、その下に「申込み→マッチング成立の円→Discordで調整」のブロックを配置。左右の矢印は横並び構図と噛み合わないため`hidden lg:flex`で`lg`以上のみ表示に。カード幅が半分になる分、Avatar・Badge・文字サイズ・余白をモバイル用に縮小し`lg:`＋`!important`で`lg`以上は元のサイズに復元（Avatar/Badgeが共通コンポーネントで固定サイズclassを持つため）。Grid子要素には`min-w-0`を付与（無いと2カラム時にカードが縮まず崩れるため必須）
   - 支払い条件の注意喚起文言を「支払い条件は当事者間で事前に合意してください。運営は金銭トラブルに関与しません。」→「支払い条件など当事者での事前確認、合意をお願いします。」に統一（`src/app/creators/[id]/request/page.tsx`・`src/app/booking/complete/page.tsx`・`src/components/dashboard/BookingCard.tsx`の3箇所）
   - Heroサブコピー（3行目まで`<br>`区切り）の折り返しが375px・414px幅で不自然だった問題を修正。まず該当pタグに`text-pretty`（Tailwind 3.4のcore utility）を適用したが、「見つかる」「交流」のような複合語・動詞が真っ二つに割れる箇所が残ったため、`「交流する。」「きっと見つかる。」`を`<span className="whitespace-nowrap">`で囲んで解消（`見つかる。`だけをnowrapにすると今度は「きっと」が割れたため、範囲を「きっと見つかる。」まで広げて対応）。375/414/640/768pxで再確認済み、崩れなし
+- discord_idの公開ページ漏洩を修正・Creator振込先情報機能を実装・ブラウザ動作確認まで完了：
+  - 【発見した既存バグ】`discord_id`（Discord ID）は「承認済みのbookingの相手にだけ表示する」設計だったが、実際には`src/lib/queries/creatorProfile.ts`が非公開ページ用クエリでも`discord_id`をselectしており、`src/app/creators/[id]/page.tsx`（認証不要の公開Creator詳細ページ）にログイン・承認状態を問わず誰でも表示されてしまっていた。該当のselect・返却・表示ブロックを削除して修正
+  - 上記の調査で、`profiles`テーブルのRLSが`profiles_select_all using (true)`（全カラムが誰でもselect可能な設計）であることが判明。discord_idのような機微情報を「booking承認後のみ」に絞るには、同テーブルへの単純なカラム追加では実現できない（RLSは行単位の制御のため）
+  - この教訓を踏まえ、Creatorの振込先情報（PayPay ID・銀行口座等、自由記述）は`profiles`とは別テーブル`creator_payment_account_info`（`supabase/migrations/0010_creator_payment_account_info.sql`）として新設。RLSで「Creator本人 or 当該Creatorとの承認済み(accepted/completed)bookingを持つPlayerのみselect可、書き込みはCreator本人のみ」に限定。これにより、Creator/Player双方の閲覧可否をDB層(RLS)だけで自動的に出し分けられ、discord_idのようにアプリ側のJS判定だけに依存する(=書き忘れると漏洩する)状態を避けている
+  - `src/components/dashboard/ProfileForm.tsx`に「振込先情報(任意)」のTextareaを追加。`profiles`とは別テーブルのため保存は個別に`upsert`
+  - `src/lib/queries/bookings.ts`：`BOOKING_SELECT`に`profiles`配下へネストする形で`creator_payment_account_info`を結合（bookingsとの直接のFKが無いため）。RLSでpending/declined中は自動的にnullになるが、念のためJS側でも`status`が`accepted`/`completed`のときだけ値を通す二重防御を追加
+  - `src/components/dashboard/BookingCard.tsx`：承認済みブロックにDiscord IDと同じ場所・見た目で振込先情報＋コピーボタンを表示
+  - 実装前に、`payment_account_info`をselectしている全箇所を洗い出し、公開系クエリ（Creator一覧・検索の`creators.ts`、Creator詳細の`creatorProfile.ts`、運営ダッシュボードの`admin.ts`）に含まれていないことを確認済み
+  - 暗号化は行わない方針（discord_id等の既存の個人情報系カラムと同水準。Supabase/Postgresの保存時暗号化に委ねる）
 
 ## 次回やること
 1. 【重要】Vercel（本番）の環境変数にADMIN_USER_IDが未追加。Production/Previewに追加しないと本番で管理者判定が効かず、誰も/adminにアクセスできない（＝常に404）、または設定ミス時に意図しないユーザーが管理者として扱われるリスクがあるため、pushとは別に必ず対応すること

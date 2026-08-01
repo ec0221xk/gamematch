@@ -17,6 +17,12 @@ export interface BookingSummary {
   /** Creatorのプロフィールに設定された支払い条件(申込時点ではなく現在の設定)。 */
   paymentTiming: string | null;
   paymentMethods: string[];
+  /**
+   * Creatorが登録した振込先情報(PayPay ID・銀行口座等の自由記述)。
+   * creator_payment_account_infoのRLS(承認済み/完了bookingの相手のみselect可)により、
+   * DB層で既にpending/declined中は取得できない。念のためJS側でもstatusを再チェックする。
+   */
+  paymentAccountInfo: string | null;
 }
 
 type RawBookingRow = {
@@ -31,10 +37,26 @@ type RawBookingRow = {
   creator_profile: {
     payment_timing: string | null;
     payment_methods: string[] | null;
+    payout:
+      | { payment_account_info: string | null }
+      | { payment_account_info: string | null }[]
+      | null;
   } | null;
 };
 
+// PostgRESTは子テーブルのFKが主キー(=1:1)の場合オブジェクトを返すが、
+// 念のため配列で返ってきた場合にも対応できるようにしておく。
+function unwrapOne<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) {
+    return value[0] ?? null;
+  }
+  return value ?? null;
+}
+
 function mapBookingRow(row: RawBookingRow): BookingSummary {
+  const isMatched = row.status === "accepted" || row.status === "completed";
+  const payout = unwrapOne(row.creator_profile?.payout);
+
   return {
     id: row.id,
     otherPartyName: row.other_party?.display_name ?? "不明なユーザー",
@@ -49,14 +71,19 @@ function mapBookingRow(row: RawBookingRow): BookingSummary {
     createdAt: row.created_at,
     paymentTiming: row.creator_profile?.payment_timing ?? null,
     paymentMethods: row.creator_profile?.payment_methods ?? [],
+    paymentAccountInfo: isMatched ? payout?.payment_account_info ?? null : null,
   };
 }
 
 // creator_profileは常にCreator本人(bookings.creator_id)の設定。
 // 閲覧者がPlayer/Creatorのどちらでも同じmapBookingRowを使えるよう、
 // other_party(閲覧者から見た相手)とは別に、Creator側の支払い設定を明示的に結合する。
+// payout(creator_payment_account_info)は、profiles配下にネストして結合する
+// (bookingsとcreator_payment_account_infoの間に直接のFKは無く、profiles経由でのみ結合可能なため)。
+// RLS("Creator本人 or 承認済み/完了bookingの相手のみselect可")により、
+// 条件を満たさない場合はこのネストしたpayoutがnullで返ってくる。
 const BOOKING_SELECT =
-  "id, price, message, status, created_at, category:categories(name), creator_game:creator_games(unit, game:games(name)), creator_profile:profiles!creator_id(payment_timing, payment_methods)";
+  "id, price, message, status, created_at, category:categories(name), creator_game:creator_games(unit, game:games(name)), creator_profile:profiles!creator_id(payment_timing, payment_methods, payout:creator_payment_account_info(payment_account_info))";
 
 /**
  * Creatorが受け取った申込一覧(/dashboard/requests)。

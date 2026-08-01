@@ -14,7 +14,6 @@ export interface CreatorProfile {
   id: string;
   displayName: string;
   bio: string | null;
-  discordId: string | null;
   avatarUrl: string | null;
   country: string | null;
   languages: string[];
@@ -45,10 +44,12 @@ export async function getCreatorProfile(
   const supabase = createClient();
 
   const [profileResult, offeringsResult, statsResult] = await Promise.all([
+    // discord_id・振込先情報は非公開項目のため、このpublicなCreator詳細ページ用クエリでは絶対にselectしないこと
+    // (discord_idについて、承認前でも公開ページに表示されてしまっていた漏洩バグを修正した経緯があるため)。
     supabase
       .from("profiles")
       .select(
-        "id, display_name, bio, discord_id, profile_image_url, country, languages, feature_tags, payment_timing, payment_methods",
+        "id, display_name, bio, profile_image_url, country, languages, feature_tags, payment_timing, payment_methods",
       )
       .eq("id", creatorId)
       .single(),
@@ -78,7 +79,6 @@ export async function getCreatorProfile(
     id: profile.id,
     displayName: profile.display_name,
     bio: profile.bio,
-    discordId: profile.discord_id,
     avatarUrl: profile.profile_image_url,
     country: profile.country,
     languages: profile.languages,

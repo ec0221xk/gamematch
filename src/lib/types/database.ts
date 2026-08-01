@@ -145,6 +145,21 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["reports"]["Insert"]>;
       };
+      creator_payment_account_info: {
+        Row: {
+          creator_id: string;
+          payment_account_info: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          creator_id: string;
+          payment_account_info?: string | null;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["creator_payment_account_info"]["Insert"]
+        >;
+      };
     };
     Views: {
       creator_stats: {

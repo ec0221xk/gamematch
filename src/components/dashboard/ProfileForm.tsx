@@ -37,6 +37,7 @@ interface ProfileFormProps {
     featureTags: string[];
     paymentTiming: string | null;
     paymentMethods: string[];
+    paymentAccountInfo: string;
     avatarUrl: string | null;
   };
 }
@@ -64,6 +65,9 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
   );
   const [paymentMethods, setPaymentMethods] = useState<string[]>(
     initialValues.paymentMethods,
+  );
+  const [paymentAccountInfo, setPaymentAccountInfo] = useState(
+    initialValues.paymentAccountInfo,
   );
   const [pendingTemplateKey, setPendingTemplateKey] = useState<string | null>(
     null,
@@ -187,6 +191,27 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
 
       if (updateError) {
         setError(toUserErrorMessage(updateError, "ProfileForm: profile update failed"));
+        setIsLoading(false);
+        return;
+      }
+
+      // profilesとは別テーブル(creator_payment_account_info)のため個別にupsertする
+      // (公開のprofilesテーブルとRLSを分け、承認済みの相手だけに閲覧を絞るため)。
+      const { error: payoutError } = await supabase
+        .from("creator_payment_account_info")
+        .upsert(
+          {
+            creator_id: user.id,
+            payment_account_info: paymentAccountInfo.trim() || null,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "creator_id" },
+        );
+
+      if (payoutError) {
+        setError(
+          toUserErrorMessage(payoutError, "ProfileForm: payout info update failed"),
+        );
         setIsLoading(false);
         return;
       }
@@ -336,6 +361,17 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
             );
           })}
         </div>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Textarea
+          label="振込先情報(任意)"
+          value={paymentAccountInfo}
+          onChange={(event) => setPaymentAccountInfo(event.target.value)}
+          placeholder="例: PayPay ID、銀行口座など(必要な範囲のみで構いません)"
+        />
+        <p className="text-xs text-gray-400">
+          公開ページには表示されません。申込が承認された後、その相手にだけ表示されます。
+        </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
