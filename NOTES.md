@@ -73,7 +73,7 @@
   - `src/components/dashboard/ProfileForm.tsx`：支払い時期（Select、未設定も選べる4択）・支払い手段（チップ型チェックボックス）の入力欄を追加（出品側の入力欄〔OfferingForm.tsx〕には追加していない）
   - `src/lib/queries/creatorProfile.ts`・`src/lib/queries/offerings.ts`・`src/lib/queries/bookings.ts`：selectにprofiles.payment_timing/payment_methodsを追加し、Creator詳細・申込・申込カードの各表示にプロフィールの値をそのまま渡す
   - `src/app/creators/[id]/page.tsx`・`src/app/creators/[id]/request/page.tsx`：支払い時期・手段をBadge表示
-  - `src/app/creators/[id]/request/page.tsx`・`src/app/booking/complete/page.tsx`・`src/components/dashboard/BookingCard.tsx`：「支払い条件は当事者間で事前に合意してください。運営は金銭トラブルに関与しません。」の注意喚起文を表示（利用規約 第5条・第8条と整合）
+  - `src/app/creators/[id]/request/page.tsx`・`src/app/booking/complete/page.tsx`・`src/components/dashboard/BookingCard.tsx`：支払い条件の注意喚起文を表示（利用規約 第5条・第8条と整合。文言はその後「支払い条件など当事者での事前確認、合意をお願いします。」に変更、詳細は下記）
   - `CreatorCard.tsx`（一覧の小カード）には情報過多を避けるため支払いバッジは入れていない
 - Heroセクションを大幅リニューアル・ブラウザ動作確認まで完了：
   - サブコピーを3行構成に変更（見出し・CTA2つ・強み3点は変更なし）
@@ -82,6 +82,10 @@
   - 役割が重複していた`TwoPillars.tsx`（推し活/コーチングの2本柱訴求）を削除し、`src/app/page.tsx`からも除去。役割はHero下部のカテゴリ帯に統合
   - `FeaturedCreators.tsx`の「すべて見る →」リンクを削除（重複導線の整理）
   - 「トップページ デザイン改善TODO」の「後回し」に記載していた「Heroのサンプルキャラのイメージ画像を魅力的に」は今回のアバター差し替えで対応完了
+- 運営者からの指摘3件を修正・ビルド確認・push済み：
+  - `HeroIllustration.tsx`のモバイル表示（`lg`未満）を、Creator/Userカードが縦一直線に並ぶ構成（Creator→矢印→マッチング成立円→矢印→User）から、両者が対等に歩み寄る構図に変更。CSS Grid（`grid-template-areas`で`"creator user" / "center center"`）でCreatorカードとUserカードを横並び2カラムにし、その下に「申込み→マッチング成立の円→Discordで調整」のブロックを配置。左右の矢印は横並び構図と噛み合わないため`hidden lg:flex`で`lg`以上のみ表示に。カード幅が半分になる分、Avatar・Badge・文字サイズ・余白をモバイル用に縮小し`lg:`＋`!important`で`lg`以上は元のサイズに復元（Avatar/Badgeが共通コンポーネントで固定サイズclassを持つため）。Grid子要素には`min-w-0`を付与（無いと2カラム時にカードが縮まず崩れるため必須）
+  - 支払い条件の注意喚起文言を「支払い条件は当事者間で事前に合意してください。運営は金銭トラブルに関与しません。」→「支払い条件など当事者での事前確認、合意をお願いします。」に統一（`src/app/creators/[id]/request/page.tsx`・`src/app/booking/complete/page.tsx`・`src/components/dashboard/BookingCard.tsx`の3箇所）
+  - Heroサブコピー（3行目まで`<br>`区切り）の折り返しが375px・414px幅で不自然だった問題を修正。まず該当pタグに`text-pretty`（Tailwind 3.4のcore utility）を適用したが、「見つかる」「交流」のような複合語・動詞が真っ二つに割れる箇所が残ったため、`「交流する。」「きっと見つかる。」`を`<span className="whitespace-nowrap">`で囲んで解消（`見つかる。`だけをnowrapにすると今度は「きっと」が割れたため、範囲を「きっと見つかる。」まで広げて対応）。375/414/640/768pxで再確認済み、崩れなし
 
 ## 次回やること
 1. 【重要】Vercel（本番）の環境変数にADMIN_USER_IDが未追加。Production/Previewに追加しないと本番で管理者判定が効かず、誰も/adminにアクセスできない（＝常に404）、または設定ミス時に意図しないユーザーが管理者として扱われるリスクがあるため、pushとは別に必ず対応すること

@@ -109,7 +109,7 @@ export default async function RequestPage({
 
       {/* 支払いに関する注意喚起(利用規約 第5条・第8条と整合) */}
       <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
-        支払い条件は当事者間で事前に合意してください。運営は金銭トラブルに関与しません。
+        支払い条件など当事者での事前確認、合意をお願いします。
       </p>
 
       <div className="mt-5">

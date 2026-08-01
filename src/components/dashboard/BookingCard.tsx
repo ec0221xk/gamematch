@@ -172,7 +172,7 @@ export function BookingCard({
             </div>
           )}
           <p className="mt-3 text-xs leading-relaxed text-brand-600">
-            支払い条件は当事者間で事前に合意してください。運営は金銭トラブルに関与しません。
+            支払い条件など当事者での事前確認、合意をお願いします。
           </p>
         </div>
       )}

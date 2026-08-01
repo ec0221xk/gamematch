@@ -136,12 +136,14 @@ export function Hero() {
               <br />
               安心して遊べる。
             </h1>
-            <p className="mt-5 text-gray-500 lg:mx-0" style={{ fontSize: "1.1rem", lineHeight: 1.75 }}>
-              一緒に遊ぶ、コーチングを受ける、推しと交流する。
+            <p className="mt-5 text-pretty text-gray-500 lg:mx-0" style={{ fontSize: "1.1rem", lineHeight: 1.75 }}>
+              一緒に遊ぶ、コーチングを受ける、推しと
+              <span className="whitespace-nowrap">交流する。</span>
               <br />
               ゲーム特化のマッチングサービスで、
               <br />
-              あなたにぴったりのCreatorがきっと見つかる。
+              あなたにぴったりのCreatorが
+              <span className="whitespace-nowrap">きっと見つかる。</span>
             </p>
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:items-start lg:justify-start">
               <ButtonLink href="/creators" size="lg" className="w-full whitespace-nowrap sm:w-auto">
