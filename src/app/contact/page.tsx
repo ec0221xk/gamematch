@@ -10,7 +10,7 @@ export default function ContactPage() {
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-gray-500">
         ご質問・ご意見・ご要望はX(旧Twitter)のDMからお気軽にどうぞ。
-        できる限り迅速に対応いたします。
+        運営からのご連絡は、毎日20時〜24時(日本時間)にまとめて対応しています。
       </p>
 
       <div className="mt-8 rounded-2xl border border-gray-100 bg-white p-6 text-center"
