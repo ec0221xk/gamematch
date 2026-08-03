@@ -4,21 +4,23 @@ import { useState } from "react";
 import Link from "next/link";
 
 const creatorSteps = [
-  { num: "01", title: "Creator登録", desc: "プロフィール・ゲーム・料金を登録します。" },
-  { num: "02", title: "Playerから申込み", desc: "依頼内容を確認します。" },
-  { num: "03", title: "承認", desc: "依頼を受けるかどうかは自由に選べます。" },
-  { num: "04", title: "日時を決める", desc: "Discordなどで連絡を取り、プレイ日時を調整します。" },
-  { num: "05", title: "一緒にプレイ", desc: "ゲームを楽しみます。" },
-  { num: "06", title: "お支払い", desc: "現在はPlayerからCreatorへ直接お支払いいただきます。" },
+  { num: "01", title: "登録する", desc: "プロフィール・タグ・支払い条件を設定します。" },
+  { num: "02", title: "出品を作る", desc: "ゲーム / カテゴリ / 料金 / 単位 / 説明を設定します。" },
+  { num: "03", title: "申し込みを受ける", desc: "Playerからの依頼内容を確認します。" },
+  { num: "04", title: "承認する", desc: "承認すると、お互いの連絡先が表示されます。" },
+  { num: "05", title: "【前払いの場合】入金を確認する", desc: "プレイ前に、入金を確認します。" },
+  { num: "06", title: "日程を決めて、一緒にプレイする", desc: "オンラインで合流し、ゲームを楽しみます。" },
+  { num: "07", title: "【後払いの場合】入金を確認する", desc: "プレイ後に、入金を確認します。" },
 ];
 
 const playerSteps = [
-  { num: "01", title: "Creatorを探す", desc: "ゲーム・ランク・料金などから、自分に合ったCreatorを探します。" },
-  { num: "02", title: "申込み", desc: "依頼内容を入力して申込みます。" },
-  { num: "03", title: "承認を待つ", desc: "Creatorが承認するとマッチング成立です。" },
-  { num: "04", title: "日時を決める", desc: "Discordなどで連絡を取り、プレイ日時を調整します。" },
-  { num: "05", title: "一緒にプレイ", desc: "Creatorとゲームを楽しみます。" },
-  { num: "06", title: "お支払い", desc: "Creatorへ直接お支払いいただきます。" },
+  { num: "01", title: "登録する", desc: "アカウントを作成します。" },
+  { num: "02", title: "出品を探す", desc: "申し込む前に、支払い条件を必ずご確認ください。" },
+  { num: "03", title: "申し込む", desc: "依頼内容を入力して申し込みます。" },
+  { num: "04", title: "承認を待つ", desc: "承認されると、連絡先と振込先が表示されます。" },
+  { num: "05", title: "【前払いの場合】お支払い", desc: "プレイ前にお支払いいただきます。" },
+  { num: "06", title: "日程を決めて、一緒にプレイする", desc: "オンラインで合流し、ゲームを楽しみます。" },
+  { num: "07", title: "【後払いの場合】お支払い", desc: "プレイ後にお支払いいただきます。" },
 ];
 
 export default function HowItWorksPage() {
@@ -31,6 +33,30 @@ export default function HowItWorksPage() {
         style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", letterSpacing: "-0.02em" }}>
         ご利用の流れ
       </h1>
+
+      {/* 役割の説明 */}
+      <div className="mt-6 rounded-2xl border border-gray-100 bg-gray-50 p-6">
+        <p className="text-sm text-gray-600">GameMatchには2つの立場があります。</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <p className="font-semibold text-gray-900">■ Creator(クリエイター)</p>
+            <p className="mt-1 text-sm leading-relaxed text-gray-500">
+              一緒に遊ぶ・コーチングを「提供する」人
+              <br />
+              出品を作って募集します
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-gray-900">■ Player(プレイヤー)</p>
+            <p className="mt-1 text-sm leading-relaxed text-gray-500">
+              一緒に遊びたい・教わりたい「依頼する」人
+              <br />
+              出品を探して申し込みます
+            </p>
+          </div>
+        </div>
+        <p className="mt-4 text-xs text-gray-400">※同じアカウントで両方できます</p>
+      </div>
 
       {/* タブ */}
       <div className="mt-8 flex rounded-xl border border-gray-200 bg-gray-50 p-1">
@@ -105,16 +131,13 @@ export default function HowItWorksPage() {
       <div className="mt-6 rounded-2xl border border-indigo-100 bg-indigo-50 p-6">
         <h2 className="font-semibold text-gray-900">お支払いについて</h2>
         <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-          現在はβ版のため、料金はCreatorとPlayerの間で直接お支払いいただいています。
-        </p>
-        <div className="mt-3">
-          <p className="text-xs font-semibold text-gray-500 mb-1">利用例</p>
-          {["PayPay", "銀行振込", "Wise", "その他双方が合意した方法"].map((item) => (
-            <p key={item} className="text-sm text-gray-600">・{item}</p>
-          ))}
-        </div>
-        <p className="mt-4 text-xs text-gray-400">
-          将来的には、GameMatch内で安全に決済できる機能を提供予定です。
+          支払いのタイミング(前払い / 後払い)と手段は、Creatorがプロフィールで設定し、その方の全ての出品に共通で適用されます。
+          <br />
+          申し込む前に、Creatorの詳細ページ・申込み画面で必ずご確認ください。
+          <br />
+          振込先はマッチング成立後にのみ表示されます。
+          <br />
+          GameMatchは決済を仲介せず、当事者間で直接やり取りいただきます。手数料は0円です。
         </p>
       </div>
 

@@ -162,7 +162,7 @@ export async function getAdminDashboardStats(): Promise<
       popularCategories: rankBy(categoryCounts),
       recentBookings: recentBookings.data.map((row) => ({
         id: row.id,
-        requesterName: row.requester?.display_name ?? "不明なユーザー",
+        requesterName: row.requester?.display_name ?? "不明なPlayer",
         creatorName: row.creator?.display_name ?? "不明なCreator",
         gameName: row.creator_game?.game?.name ?? "不明なゲーム",
         categoryName: row.category?.name ?? "-",
