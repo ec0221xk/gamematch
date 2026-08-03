@@ -103,6 +103,12 @@
 - リンク切れチェックスクリプトを追加（`scripts/check-links.mjs`、`npm run check-links`）：トップページを起点に`<a href>`を再帰的に辿り、同一オリジンの内部リンクだけを対象にステータスコードをチェックする自作クローラー（外部リンク・mailto:・tel:・#アンカーは対象外）。過去に見つかった「リンクは貼られているが実体のページが無い」ケース（/faqの404）を今後も検出できるようにする目的で作成。今後も`npm run check-links`で再実行可能（起点URLは引数で変更可、例: 本番URLを指定して確認することも可能）
   - 実行結果：現時点で巡回24ページ・リンク切れ0件（/faq修正後の確認込み）
   - 制約：未ログイン状態でのクロールのため`/dashboard`配下・`/admin`は対象外（ログイン時のみHeaderに表示されるリンクのため）。動的ルート（`/creators/[id]`等）は実データがありどこかからリンクされている場合のみ到達可能
+- 集客開始（X DM経由の導線）前の修正4件のうち①「連絡先欄の汎用化」対応：DiscordアカウントがないCreatorが登録の最後で詰まる問題への対処。DBカラム名（`discord_id`）や内部変数名（`discordId`/`otherPartyDiscordId`）は変更せず、表示文言のみ変更：
+  - `src/components/dashboard/ProfileForm.tsx`：入力欄のlabelを「Discord ID」→「連絡先(Discord ID / X のID など)」に、placeholderを「例: aoi#1234」→「例: aoi#1234 または @your_x_id」に変更
+  - `src/components/dashboard/BookingCard.tsx`：承認後の案内文「以下のDiscordで{相手}と連絡してください」→「以下の連絡先で{相手}と連絡してください」に変更
+  - `src/components/marketing/TrustSection.tsx`・`src/components/marketing/HowItWorks.tsx`：Discord前提の書き方だった箇所を「Discordなどの〜」という表現に変更（Discord利用者が多数派のため、完全な削除はせず併記の形にした）
+  - 確認の結果、`src/app/faq/page.tsx`・`src/app/safety/page.tsx`・`BookingCard.tsx`の連絡先未設定時メッセージは元々「Discordなど」表現済み、または元々Discordに触れない文言だったため変更不要だった
+  - `src/lib/queries/creatorProfile.ts`は既存の対策（discord_idの公開ページ漏洩修正）により非公開ページ用クエリで`discord_id`をselectしない状態が維持されていることを確認済み
 
 ## 次回やること
 1. 【重要】Vercel（本番）の環境変数にADMIN_USER_IDが未追加。Production/Previewに追加しないと本番で管理者判定が効かず、誰も/adminにアクセスできない（＝常に404）、または設定ミス時に意図しないユーザーが管理者として扱われるリスクがあるため、pushとは別に必ず対応すること

@@ -146,7 +146,7 @@ export function BookingCard({
           {booking.otherPartyDiscordId ? (
             <>
               <p className="text-brand-700">
-                承認されました。以下のDiscordで{otherPartyLabel}と連絡してください。
+                承認されました。以下の連絡先で{otherPartyLabel}と連絡してください。
               </p>
               <div className="mt-2 flex items-center gap-2">
                 <span className="font-mono text-brand-900">

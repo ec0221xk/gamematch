@@ -376,10 +376,10 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Input
-            label="Discord ID"
+            label="連絡先(Discord ID / X のID など)"
             value={discordId}
             onChange={(event) => setDiscordId(event.target.value)}
-            placeholder="例: aoi#1234"
+            placeholder="例: aoi#1234 または @your_x_id"
           />
           <p className="mt-1.5 text-xs text-gray-400">
             承認後、マッチングした相手に表示されます。
