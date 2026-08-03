@@ -107,7 +107,7 @@ export default async function RequestPage({
         )}
       </Card>
 
-      {/* 支払いに関する注意喚起(利用規約 第5条・第8条と整合) */}
+      {/* 支払いに関する注意喚起(利用規約 第5条・第6条・第9条と整合) */}
       <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
         支払い条件など当事者での事前確認、合意をお願いします。
       </p>
