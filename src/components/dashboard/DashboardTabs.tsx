@@ -5,13 +5,18 @@ import { usePathname } from "next/navigation";
 
 interface DashboardTabsProps {
   isCreator: boolean;
+  /** 運営からの未読メッセージ件数。0件のときはバッジを表示しない */
+  unreadMessageCount?: number;
 }
 
 /**
- * /dashboard配下の3ページ(マイページ/受け取った申込/申込状況)を行き来するためのタブ。
+ * /dashboard配下の4ページ(マイページ/受け取った申込/申込状況/運営からのお知らせ)を行き来するためのタブ。
  * ヘッダーから個別リンクを外した代わりに、マイページ経由でここに辿り着ける。
  */
-export function DashboardTabs({ isCreator }: DashboardTabsProps) {
+export function DashboardTabs({
+  isCreator,
+  unreadMessageCount = 0,
+}: DashboardTabsProps) {
   const pathname = usePathname();
 
   const tabs = [
@@ -20,6 +25,7 @@ export function DashboardTabs({ isCreator }: DashboardTabsProps) {
       ? [{ href: "/dashboard/requests", label: "受け取った申込" }]
       : []),
     { href: "/dashboard/my-requests", label: "申込状況" },
+    { href: "/dashboard/messages", label: "運営からのお知らせ" },
   ];
 
   return (
@@ -31,13 +37,18 @@ export function DashboardTabs({ isCreator }: DashboardTabsProps) {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-1.5 border-b-2 py-3 text-sm font-medium transition-colors ${
                 active
                   ? "border-gray-900 text-gray-900"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
               {tab.label}
+              {tab.href === "/dashboard/messages" && unreadMessageCount > 0 && (
+                <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                  {unreadMessageCount}
+                </span>
+              )}
             </Link>
           );
         })}

@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { Badge, Card, QueryErrorNotice } from "@/components/ui";
 import { StatCard } from "@/components/admin/StatCard";
 import { getAdminDashboardStats } from "@/lib/queries/admin";
+import { getUnreadReplyCount } from "@/lib/queries/adminMessages";
 import type { BookingStatus } from "@/lib/types/database";
 
 const STATUS_LABEL: Record<BookingStatus, string> = {
@@ -32,7 +34,10 @@ function formatPercent(rate: number | null) {
 }
 
 export default async function AdminDashboardPage() {
-  const statsResult = await getAdminDashboardStats();
+  const [statsResult, unreadReplyResult] = await Promise.all([
+    getAdminDashboardStats(),
+    getUnreadReplyCount(),
+  ]);
 
   if (!statsResult.ok) {
     return (
@@ -46,6 +51,7 @@ export default async function AdminDashboardPage() {
   }
 
   const stats = statsResult.data;
+  const unreadReplyCount = unreadReplyResult.ok ? unreadReplyResult.data : 0;
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
@@ -55,6 +61,24 @@ export default async function AdminDashboardPage() {
       <p className="mt-1 text-sm text-gray-500">
         サービス全体の利用状況を確認できます。
       </p>
+
+      <section className="mt-8">
+        <Link href="/admin/messages">
+          <Card className="flex items-center justify-between gap-3 transition-shadow hover:shadow-md">
+            <div>
+              <h2 className="text-sm font-medium text-gray-900">
+                運営からのメッセージ
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                ユーザーへ連絡したり、返信を確認できます。
+              </p>
+            </div>
+            {unreadReplyCount > 0 && (
+              <Badge variant="danger">未読{unreadReplyCount}</Badge>
+            )}
+          </Card>
+        </Link>
+      </section>
 
       <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="登録ユーザー総数" value={stats.totalUsers.toLocaleString()} />

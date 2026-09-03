@@ -160,6 +160,25 @@ export type Database = {
           Database["public"]["Tables"]["creator_payment_account_info"]["Insert"]
         >;
       };
+      admin_messages: {
+        Row: {
+          id: string;
+          user_id: string;
+          sender_is_admin: boolean;
+          body: string;
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          sender_is_admin: boolean;
+          body: string;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["admin_messages"]["Insert"]>;
+      };
     };
     Views: {
       creator_stats: {
